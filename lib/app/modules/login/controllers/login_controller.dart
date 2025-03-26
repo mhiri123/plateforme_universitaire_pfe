@@ -1,56 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../chat/controllers/chat_controller.dart';
-import '../../demande/controllers/demande_controller.dart';
-import '../../home/controllers/notification_controller.dart';
+import '../../demandereo/controllers/demandereo_controller.dart';
+import '../../demandetransfert/controllers/demandetransfert_controller.dart';
 import '../../homeadmin/views/homeadmin_view.dart';
+import '../../notification/controllers/notification_controller.dart';
 import '../../homestudent/views/homestudent_view.dart';
 import '../../hometeacher/views/hometeacher_view.dart';
 
+
+
 class LoginController extends GetxController {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final isLoading = false.obs;
 
-  void login() {
-    String email = emailController.text.trim();
-    String password = passwordController.text.trim();
+  void login(String email, String password) async {
+    isLoading.value = true;
+    await Future.delayed(Duration(seconds: 1)); // Simulation de chargement
 
-    if (email.isEmpty || password.isEmpty) {
-      Get.snackbar("Erreur", "Veuillez remplir tous les champs",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white);
-      return;
-    }
+    // Initialisation des controllers
+    Get.put(ChatController());
+    Get.put(NotificationController());
+    Get.put(DemandeTransfertController());
+    Get.put(DemandeReorientationController());
 
-    final demandeController = Get.put(DemandeController());
-    final chatController = Get.put(ChatController());
-    final notificationController = Get.put(NotificationController());
-
-    if (email == 'student@example.com' && password == 'password123') {
-      Get.off(() => StudentHomeScreen(
-        demandeReoController: demandeController,
-        demandeTransfertController: demandeController,
-        chatController: chatController,
-        notificationController: notificationController,
-      ));
+    // Authentification et redirection en fonction du rôle
+    if (email == 'admin@example.com' && password == 'password123') {
+      Get.offAll(() => AdminHomeScreen());
     } else if (email == 'teacher@example.com' && password == 'password123') {
-      Get.off(() => TeacherHomeScreen(
-        demandeController: demandeController,
-        chatController: chatController,
-        notificationController: notificationController,
-      ));
-    } else if (email == 'admin@example.com' && password == 'password123') {
-      Get.off(() => AdminHomeScreen(
-        demandeController: demandeController,
-        chatController: chatController,
-        notificationController: notificationController,
-      ));
+      Get.offAll(() => TeacherHomeScreen());
+    } else if (email == 'student@example.com' && password == 'password123') {
+      Get.offAll(() => StudentHomeScreen());
     } else {
-      Get.snackbar("Erreur", "Email ou mot de passe incorrect",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white);
+      Get.snackbar("Erreur", "Identifiants incorrects",
+          backgroundColor: Colors.red, colorText: Colors.white);
     }
+
+    isLoading.value = false;
   }
 }

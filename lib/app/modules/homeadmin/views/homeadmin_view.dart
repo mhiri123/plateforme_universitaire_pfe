@@ -1,70 +1,57 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../chat/controllers/chat_controller.dart';
-import '../../demande/controllers/demande_controller.dart';
-import '../../home/controllers/notification_controller.dart';
-
+import '../../demandereo/controllers/demandereo_controller.dart';
+import '../../demandetransfert/controllers/demandetransfert_controller.dart';
+import '../../notification/controllers/notification_controller.dart';
+import '../../traiterdemande/views/traiterdemande_view.dart';
+ // Suppose que vous avez déjà un écran pour traiter les demandes
 
 class AdminHomeScreen extends StatelessWidget {
-  final DemandeController demandeController;
-  final ChatController chatController;
-  final NotificationController notificationController;
-
-  AdminHomeScreen({
-    required this.demandeController,
-    required this.chatController,
-    required this.notificationController,
-  });
+  final DemandeReorientationController demandeReorientationController = Get.find();
+  final DemandeTransfertController demandeTransfertController = Get.find();
+  final ChatController chatController = Get.find();
+  final NotificationController notificationController = Get.find();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Accueil Admin"),
-        backgroundColor: Colors.blue,
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("assets/background_admin.jpg"), // Remplacez par l'image de fond souhaitée
-            fit: BoxFit.cover,
-          ),
-        ),
+      appBar: AppBar(title: Text("Page d'accueil Admin")),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
             ListTile(
-              title: Text(
-                "Gérer les demandes de réorientation et de transfert",
-                style: TextStyle(fontSize: 18, color: Colors.white),
-              ),
+              title: Text('Gérer les demandes de réorientation'),
+              leading: Icon(Icons.assignment),
               onTap: () {
-                // Naviguer vers l'écran pour gérer les demandes
+                // Navigation vers l'écran de gestion des demandes de réorientation
+                Get.to(() => TraiterDemandeScreen(demandeType: 'Réorientation'));
               },
             ),
             ListTile(
-              title: Text(
-                "Envoyer une notification",
-                style: TextStyle(fontSize: 18, color: Colors.white),
-              ),
+              title: Text('Gérer les demandes de transfert'),
+              leading: Icon(Icons.transfer_within_a_station),
               onTap: () {
-                // Naviguer vers l'écran pour envoyer une notification
+                // Navigation vers l'écran de gestion des demandes de transfert
+                Get.to(() => TraiterDemandeScreen(demandeType: 'Transfert'));
               },
             ),
+            Divider(),
             ListTile(
-              title: Text(
-                "Voir les statistiques",
-                style: TextStyle(fontSize: 18, color: Colors.white),
-              ),
+              title: Text('Chat'),
+              leading: Icon(Icons.chat),
               onTap: () {
-                // Naviguer vers l'écran des statistiques
+                // L'admin peut accéder au chat
+                // Vous pouvez ouvrir une vue de chat ici
               },
             ),
+            Divider(),
             ListTile(
-              title: Text(
-                "Accéder au chat",
-                style: TextStyle(fontSize: 18, color: Colors.white),
-              ),
+              title: Text('Notifications'),
+              leading: Icon(Icons.notifications),
               onTap: () {
-                // Naviguer vers l'écran de chat
+                // L'admin peut consulter les notifications
               },
             ),
           ],

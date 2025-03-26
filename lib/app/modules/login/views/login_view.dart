@@ -1,16 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-// Importation des contrôleurs et vues
-import '../../chat/controllers/chat_controller.dart';
-import '../../demande/controllers/demande_controller.dart';
 import '../../forgotpassword/views/forgotpassword_view.dart';
-import '../../home/controllers/notification_controller.dart';
-import '../../home/views/home_screen.dart';
-import '../../homeadmin/views/homeadmin_view.dart';
-import '../../homestudent/views/homestudent_view.dart';
-import '../../hometeacher/views/hometeacher_view.dart';
 import '../../signup/views/signup_view.dart';
+import '../../home/views/home_screen.dart';
+import '../controllers/login_controller.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -21,16 +14,17 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final LoginController loginController = Get.put(LoginController());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Image de fond normale (sans flou)
+          // Image de fond
           Positioned.fill(
             child: Image.asset(
-              "assets/images/login.jpeg", // Remplacez par votre image
+              "assets/images/login.jpeg", // Assurez-vous d'avoir cette image
               fit: BoxFit.cover,
             ),
           ),
@@ -64,9 +58,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter your email';
+                          return 'Veuillez entrer votre email';
                         } else if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
-                          return 'Please enter a valid email';
+                          return 'Email invalide';
                         }
                         return null;
                       },
@@ -76,7 +70,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       controller: passwordController,
                       obscureText: true,
                       decoration: InputDecoration(
-                        labelText: "Password",
+                        labelText: "Mot de passe",
                         prefixIcon: Icon(Icons.lock, color: Colors.red),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                         filled: true,
@@ -84,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter your password';
+                          return 'Veuillez entrer votre mot de passe';
                         }
                         return null;
                       },
@@ -93,48 +87,46 @@ class _LoginScreenState extends State<LoginScreen> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () {
-                          // Navigation vers l'écran de réinitialisation du mot de passe
-                          Get.to(() => ForgotPasswordScreen());
-                        },
-                        child: Text("Forgot Password?", style: TextStyle(color: Colors.red)),
+                        onPressed: () => Get.to(() => ForgotPasswordScreen()),
+                        child: Text("Mot de passe oublié ?", style: TextStyle(color: Colors.red)),
                       ),
                     ),
                     SizedBox(height: 15),
-                    ElevatedButton(
-                      onPressed: () {
+                    Obx(() => ElevatedButton(
+                      onPressed: loginController.isLoading.value
+                          ? null
+                          : () {
                         if (_formKey.currentState!.validate()) {
-                          _handleLogin();
+                          loginController.login(
+                            emailController.text.trim(),
+                            passwordController.text.trim(),
+                          );
                         }
                       },
-                      child: Text("LOGIN"),
+                      child: loginController.isLoading.value
+                          ? CircularProgressIndicator(color: Colors.white)
+                          : Text("LOGIN"),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                         minimumSize: Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
-                    ),
+                    )),
                     SizedBox(height: 15),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("Don't have an account?", style: TextStyle(color: Colors.black54)),
+                        Text("Vous n'avez pas de compte ?", style: TextStyle(color: Colors.black54)),
                         TextButton(
-                          onPressed: () {
-                            // Navigation vers l'écran d'inscription
-                            Get.to(() => SignUpScreen());
-                          },
-                          child: Text("Sign Up", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                          onPressed: () => Get.to(() => SignUpScreen()),
+                          child: Text("S'inscrire", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
                         ),
                       ],
                     ),
                     SizedBox(height: 10),
-                    // Bouton retour vers HomeScreen
                     TextButton(
-                      onPressed: () {
-                        Get.offAll(() => HomeScreen());
-                      },
-                      child: Text("Back to Home", style: TextStyle(color: Colors.blue)),
+                      onPressed: () => Get.offAll(() => HomeScreen()),
+                      child: Text("Retour à l'accueil", style: TextStyle(color: Colors.blue)),
                     ),
                   ],
                 ),
@@ -145,34 +137,4 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-
-  void _handleLogin() {
-    String email = emailController.text;
-    String password = passwordController.text;
-
-    if (email == 'admin@example.com' && password == 'password123') {
-      Get.offAll(() => AdminHomeScreen(
-        demandeController: Get.put(DemandeController()),
-        chatController: Get.put(ChatController()),
-        notificationController: Get.put(NotificationController()),
-      ));
-    } else if (email == 'teacher@example.com' && password == 'password123') {
-      Get.offAll(() => TeacherHomeScreen(
-        demandeController: Get.put(DemandeController()),
-        chatController: Get.put(ChatController()),
-        notificationController: Get.put(NotificationController()),
-      ));
-    } else if (email == 'student@example.com' && password == 'password123') {
-      Get.offAll(() => StudentHomeScreen(
-        demandeReoController: Get.put(DemandeController()),
-        demandeTransfertController: Get.put(DemandeController()),
-        chatController: Get.put(ChatController()),
-        notificationController: Get.put(NotificationController()),
-      ));
-    } else {
-      Get.snackbar("Error", "Invalid credentials",
-          backgroundColor: Colors.red, colorText: Colors.white);
-    }
-  }
 }
-

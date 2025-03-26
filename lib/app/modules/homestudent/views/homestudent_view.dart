@@ -1,63 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../chat/controllers/chat_controller.dart';
-import '../../demande/controllers/demande_controller.dart';
-import '../../home/controllers/notification_controller.dart';
+import '../../demandereo/views/demandereo_view.dart';
+import '../../demandetransfert/views/demandetransfert_view.dart';
+import '../../notification/controllers/notification_controller.dart';
 
 
 class StudentHomeScreen extends StatelessWidget {
-  final DemandeController demandeReoController;
-  final DemandeController demandeTransfertController;
-  final ChatController chatController;
-  final NotificationController notificationController;
-
-  StudentHomeScreen({
-    required this.demandeReoController,
-    required this.demandeTransfertController,
-    required this.chatController,
-    required this.notificationController,
-  });
+  final ChatController chatController = Get.find();
+  final NotificationController notificationController = Get.find();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Accueil Étudiant"),
-        backgroundColor: Colors.deepOrange,
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("assets/background_student.jpg"), // Remplacez par l'image de fond souhaitée
-            fit: BoxFit.cover,
-          ),
-        ),
+      appBar: AppBar(title: Text("Accueil Étudiant")),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
             ListTile(
-              title: Text(
-                "Faire une demande de réorientation (ReO)",
-                style: TextStyle(fontSize: 18, color: Colors.white),
-              ),
+              title: Text('Faire une demande de réorientation'),
+              leading: Icon(Icons.school),
               onTap: () {
-                // Naviguer vers l'écran pour faire une demande ReO
+                Get.to(() => DemandeReorientationScreen());
               },
             ),
             ListTile(
-              title: Text(
-                "Faire une demande de transfert",
-                style: TextStyle(fontSize: 18, color: Colors.white),
-              ),
+              title: Text('Faire une demande de transfert'),
+              leading: Icon(Icons.transfer_within_a_station),
               onTap: () {
-                // Naviguer vers l'écran pour faire une demande de transfert
+                Get.to(() => DemandeTransfertScreen());
               },
             ),
+            Divider(),
             ListTile(
-              title: Text(
-                "Accéder au chat",
-                style: TextStyle(fontSize: 18, color: Colors.white),
-              ),
+              title: Text('Chat'),
+              leading: Icon(Icons.chat),
               onTap: () {
-                // Naviguer vers l'écran de chat
+                // Navigation vers l'écran de chat
+              },
+            ),
+            Divider(),
+            ListTile(
+              title: Text('Notifications'),
+              leading: Icon(Icons.notifications),
+              onTap: () {
+                // Navigation vers l'écran de notifications
               },
             ),
           ],

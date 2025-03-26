@@ -1,45 +1,15 @@
-import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../chat/controllers/chat_controller.dart';
+import '../../demandereo/controllers/demandereo_controller.dart';
+import '../../demandetransfert/controllers/demandetransfert_controller.dart';
+import '../../notification/controllers/notification_controller.dart';
 
-class AdminHomeController {
-  final BuildContext context;
+class AdminHomeController extends GetxController {
+  final DemandeReorientationController demandeReorientationController = Get.put(DemandeReorientationController());
+  final DemandeTransfertController demandeTransfertController = Get.put(DemandeTransfertController());
+  final ChatController chatController = Get.put(ChatController());
+  final NotificationController notificationController = Get.put(NotificationController());
 
-  AdminHomeController(this.context);
-
-  // Gérer les facultés
-  void navigateToFaculties() {
-    Navigator.pushNamed(context, "/admin_faculties");
-  }
-
-  // Gérer les demandes
-  void navigateToRequests() {
-    Navigator.pushNamed(context, "/admin_requests");
-  }
-
-  // Gérer les utilisateurs
-  void navigateToUsers() {
-    Navigator.pushNamed(context, "/admin_users");
-  }
-
-  // Voir les notifications
-  void navigateToNotifications() {
-    Navigator.pushNamed(context, "/notifications");
-  }
-
-  // Déconnexion et retour à l'écran de connexion
-  void logout() {
-    Navigator.pushReplacementNamed(context, "/login");
-  }
-
-
-  Widget manageFaculties() {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Manage Faculties"),
-        backgroundColor: Colors.red,
-      ),
-      body: Center(
-        child: Text("Manage Faculties Screen"),
-      ),
-    );
-  }
+// Logique pour traiter les demandes, chat, notifications
+// Ajoutez les méthodes nécessaires pour traiter des demandes, etc.
 }

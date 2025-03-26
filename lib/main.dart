@@ -14,20 +14,20 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'REO Platform',
-      theme: ThemeData(
-        primarySwatch: Colors.red,
-        textTheme: TextTheme(
-          titleLarge: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
-        ),
-        buttonTheme: ButtonThemeData(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+        debugShowCheckedModeBanner: false,
+        title: 'REO Platform',
+        theme: ThemeData(
+          primarySwatch: Colors.red,
+          textTheme: TextTheme(
+            titleLarge: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+          ),
+          buttonTheme: ButtonThemeData(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         ),
-      ),
-      home: HomeScreen(),
+        home: HomeScreen(),
     );
   }
 }

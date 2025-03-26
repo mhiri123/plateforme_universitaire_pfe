@@ -8,6 +8,8 @@ import '../modules/demande/bindings/demande_binding.dart';
 import '../modules/demande/views/demande_view.dart';
 import '../modules/demandereo/bindings/demandereo_binding.dart';
 import '../modules/demandereo/views/demandereo_view.dart';
+import '../modules/demandetransfert/bindings/demandetransfert_binding.dart';
+import '../modules/demandetransfert/views/demandetransfert_view.dart';
 import '../modules/forgotpassword/bindings/forgotpassword_binding.dart';
 import '../modules/forgotpassword/views/forgotpassword_view.dart';
 import '../modules/homeadmin/bindings/homeadmin_binding.dart';
@@ -26,6 +28,8 @@ import '../modules/procedures/bindings/procedures_binding.dart';
 import '../modules/procedures/views/procedures_view.dart';
 import '../modules/signup/bindings/signup_binding.dart';
 import '../modules/signup/views/signup_view.dart';
+import '../modules/traiterdemande/bindings/traiterdemande_binding.dart';
+import '../modules/traiterdemande/views/traiterdemande_view.dart';
 
 part 'app_routes.dart';
 
@@ -99,6 +103,16 @@ class AppPages {
       name: _Paths.PROCEDURES,
       page: () => const ProceduresView(),
       binding: ProceduresBinding(),
+    ),
+    GetPage(
+      name: _Paths.DEMANDETRANSFERT,
+      page: () => const DemandetransfertView(),
+      binding: DemandetransfertBinding(),
+    ),
+    GetPage(
+      name: _Paths.TRAITERDEMANDE,
+      page: () => const TraiterdemandeView(),
+      binding: TraiterdemandeBinding(),
     ),
   ];
 }

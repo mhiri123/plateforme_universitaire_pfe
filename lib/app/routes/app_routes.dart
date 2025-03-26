@@ -17,6 +17,8 @@ abstract class Routes {
   static const ABOUTUS = _Paths.ABOUTUS;
   static const NEWS = _Paths.NEWS;
   static const PROCEDURES = _Paths.PROCEDURES;
+  static const DEMANDETRANSFERT = _Paths.DEMANDETRANSFERT;
+  static const TRAITERDEMANDE = _Paths.TRAITERDEMANDE;
 }
 
 abstract class _Paths {
@@ -30,9 +32,11 @@ abstract class _Paths {
   static const DEMANDEREO = '/demandereo';
   static const LOGIN = '/login';
   static const CHAT = '/chat';
-  static const DEMANDE = '/demande';
+  static const DEMANDE = '/traiterdemande';
   static const NOTIFICATION = '/notification';
   static const ABOUTUS = '/aboutus';
   static const NEWS = '/news';
   static const PROCEDURES = '/procedures';
+  static const DEMANDETRANSFERT = '/demandetransfert';
+  static const TRAITERDEMANDE = '/traiterdemande';
 }

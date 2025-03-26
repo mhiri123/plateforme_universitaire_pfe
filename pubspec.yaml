@@ -73,6 +73,10 @@ flutter:
      - assets/images/login.jpeg
      - assets/images/amphi.jpg
      - assets/images/procedures.jpeg
+     - assets/images/student.jpeg
+     - assets/images/maintenance.jpeg
+     - assets/images/web.webp
+     - assets/images/tech.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

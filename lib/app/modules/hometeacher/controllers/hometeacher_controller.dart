@@ -1,27 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../chat/controllers/chat_controller.dart';
+import '../../demandetransfert/controllers/demandetransfert_controller.dart';
+import '../../notification/controllers/notification_controller.dart';
 
-class TeacherController {
-  final BuildContext context;
-
-  TeacherController(this.context);
-
-  // Gérer les demandes de transfert
-  void viewTransferRequests() {
-    Navigator.pushNamed(context, "/teacher_transfer_requests");
-  }
-
-  // Accéder aux messages
-  void openMessages() {
-    Navigator.pushNamed(context, "/chat");
-  }
-
-  // Voir les notifications
-  void viewNotifications() {
-    Navigator.pushNamed(context, "/notifications");
-  }
-
-  // Déconnexion et retour à l'écran de connexion
-  void logout() {
-    Navigator.pushReplacementNamed(context, "/login");
-  }
+class TeacherHomeController extends GetxController {
+  final ChatController chatController = Get.put(ChatController());
+  final NotificationController notificationController = Get.put(NotificationController());
+  final DemandeTransfertController demandeTransfertController = Get.put(DemandeTransfertController());
 }

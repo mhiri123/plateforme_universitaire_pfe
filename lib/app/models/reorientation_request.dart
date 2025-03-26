@@ -2,8 +2,8 @@ class ReorientationRequest {
   final String studentName; // Nom de l'étudiant
   final String currentField; // Filière actuelle
   final String desiredField; // Filière désirée
-  final String status; // Statut de la demande (ex. : "Pending", "Approved", "Rejected")
-  final DateTime requestDate; // Date de la demande
+  final String status; // Statut de la traiterdemande (ex. : "Pending", "Approved", "Rejected")
+  final DateTime requestDate; // Date de la traiterdemande
 
   // Constructeur pour initialiser les variables
   ReorientationRequest({
