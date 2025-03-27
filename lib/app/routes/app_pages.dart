@@ -4,8 +4,6 @@ import '../modules/aboutus/bindings/aboutus_binding.dart';
 import '../modules/aboutus/views/aboutus_view.dart';
 import '../modules/chat/bindings/chat_binding.dart';
 import '../modules/chat/views/chat_view.dart';
-import '../modules/demande/bindings/demande_binding.dart';
-import '../modules/demande/views/demande_view.dart';
 import '../modules/demandereo/bindings/demandereo_binding.dart';
 import '../modules/demandereo/views/demandereo_view.dart';
 import '../modules/demandetransfert/bindings/demandetransfert_binding.dart';
@@ -41,77 +39,73 @@ class AppPages {
   static final routes = [
     GetPage(
       name: _Paths.FORGOTPASSWORD,
-      page: () => const ForgotpasswordView(),
+      page: () => ForgotPasswordScreen(),
       binding: ForgotpasswordBinding(),
     ),
     GetPage(
       name: _Paths.SIGNUP,
-      page: () => const SignupView(),
+      page: () => SignUpScreen(),
       binding: SignupBinding(),
     ),
     GetPage(
       name: _Paths.HOMETEACHER,
-      page: () => const HometeacherView(),
+      page: () => TeacherHomeScreen(),
       binding: HometeacherBinding(),
     ),
     GetPage(
       name: _Paths.HOMEADMIN,
-      page: () => const HomeadminView(),
-      binding: HomeadminBinding(),
+      page: () => AdminHomeScreen(),
+      binding: AdminHomeBinding(),
     ),
     GetPage(
       name: _Paths.HOMESTUDENT,
-      page: () => const HomestudentView(),
+      page: () => StudentHomeScreen(),
       binding: HomestudentBinding(),
     ),
     GetPage(
       name: _Paths.DEMANDEREO,
-      page: () => const DemandereoView(),
+      page: () => DemandeReorientationScreen (),
       binding: DemandereoBinding(),
     ),
     GetPage(
       name: _Paths.LOGIN,
-      page: () => const LoginView(),
+      page: () => LoginScreen(),
       binding: LoginBinding(),
     ),
     GetPage(
       name: _Paths.CHAT,
-      page: () => const ChatView(),
+      page: () => ChatScreen (),
       binding: ChatBinding(),
     ),
-    GetPage(
-      name: _Paths.DEMANDE,
-      page: () => const DemandeView(),
-      binding: DemandeBinding(),
-    ),
+
     GetPage(
       name: _Paths.NOTIFICATION,
-      page: () => const NotificationView(),
+      page: () => NotificationScreen(),
       binding: NotificationBinding(),
     ),
     GetPage(
       name: _Paths.ABOUTUS,
-      page: () => const AboutusView(),
+      page: () => AboutUsScreen (),
       binding: AboutusBinding(),
     ),
     GetPage(
       name: _Paths.NEWS,
-      page: () => const NewsView(),
+      page: () => NewsScreen(),
       binding: NewsBinding(),
     ),
     GetPage(
       name: _Paths.PROCEDURES,
-      page: () => const ProceduresView(),
+      page: () => ProceduresScreen(),
       binding: ProceduresBinding(),
     ),
     GetPage(
       name: _Paths.DEMANDETRANSFERT,
-      page: () => const DemandetransfertView(),
+      page: () => DemandeTransfertScreen(),
       binding: DemandetransfertBinding(),
     ),
     GetPage(
       name: _Paths.TRAITERDEMANDE,
-      page: () => const TraiterdemandeView(),
+      page: () => TraiterDemandeScreen (demandeType: '',),
       binding: TraiterdemandeBinding(),
     ),
   ];

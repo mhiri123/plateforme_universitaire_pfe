@@ -5,8 +5,8 @@ import '../controllers/demandereo_controller.dart';
 class DemandereoBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<DemandereoController>(
-      () => DemandereoController(),
+    Get.lazyPut<DemandeReorientationController>(
+      () => DemandeReorientationController(),
     );
   }
 }

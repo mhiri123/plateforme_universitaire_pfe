@@ -5,8 +5,8 @@ import '../controllers/traiterdemande_controller.dart';
 class TraiterdemandeBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<TraiterdemandeController>(
-      () => TraiterdemandeController(),
+    Get.lazyPut<DemandeController>(
+      () => DemandeController(),
     );
   }
 }
