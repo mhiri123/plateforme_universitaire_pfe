@@ -13,7 +13,7 @@ class _ApiService implements ApiService {
     this._dio, {
     this.baseUrl,
   }) {
-    baseUrl ??= 'https://api.example.com';
+    baseUrl ??= 'https://example.com/api/';
   }
 
   final Dio _dio;
@@ -21,41 +21,17 @@ class _ApiService implements ApiService {
   String? baseUrl;
 
   @override
-  Future<List<User>> getUsers() async {
+  Future<User> login(
+    String email,
+    String password,
+  ) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final Map<String, dynamic>? _data = null;
-    final _result =
-        await _dio.fetch<List<dynamic>>(_setStreamType<List<User>>(Options(
-      method: 'GET',
-      headers: _headers,
-      extra: _extra,
-    )
-            .compose(
-              _dio.options,
-              '/users',
-              queryParameters: queryParameters,
-              data: _data,
-            )
-            .copyWith(
-                baseUrl: _combineBaseUrls(
-              _dio.options.baseUrl,
-              baseUrl,
-            ))));
-    var value = _result.data!
-        .map((dynamic i) => User.fromJson(i as Map<String, dynamic>))
-        .toList();
-    return value;
-  }
-
-  @override
-  Future<User> createUser(User user) async {
-    const _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    _data.addAll(user.toJson());
+    final _data = {
+      'email': email,
+      'password': password,
+    };
     final _result =
         await _dio.fetch<Map<String, dynamic>>(_setStreamType<User>(Options(
       method: 'POST',
@@ -64,7 +40,7 @@ class _ApiService implements ApiService {
     )
             .compose(
               _dio.options,
-              '/users',
+              'login',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -105,11 +81,5 @@ class _ApiService implements ApiService {
     }
 
     return Uri.parse(dioBaseUrl).resolveUri(url).toString();
-  }
-
-  @override
-  Future<dynamic> login(String email, String password) {
-    // TODO: implement login
-    throw UnimplementedError();
   }
 }
