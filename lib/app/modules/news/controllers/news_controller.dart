@@ -1,7 +1,8 @@
 import 'package:get/get.dart';
 import '../../../models/news.dart';
 
-import '../../../sevices/news_service.dart';
+import '../../../services/news_service.dart';
+
 
 
 class NewsController extends GetxController {

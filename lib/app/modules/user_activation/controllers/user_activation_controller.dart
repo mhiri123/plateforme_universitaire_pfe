@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import '../../../models/user.dart';
-import '../../../sevices/user_service.dart';
+import '../../../services/user_service.dart';
 import 'package:dio/dio.dart';
 
 class UserActivationController extends GetxController {

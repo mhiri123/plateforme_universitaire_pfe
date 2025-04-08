@@ -2,7 +2,8 @@ import 'package:get/get.dart';
 import '../../../models/user.dart';
 import 'package:dio/dio.dart';
 
-import '../../../sevices/user_service.dart';
+import '../../../services/user_service.dart';
+
 
 class UserManagementController extends GetxController {
   final Dio _dio = Dio();

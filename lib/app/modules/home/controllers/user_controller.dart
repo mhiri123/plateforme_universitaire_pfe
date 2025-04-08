@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import '../../../sevices/permission_service.dart';
+import '../../../services/permission_service.dart';
 import '../../../models/permission.dart';
 
 class UserController extends GetxController {

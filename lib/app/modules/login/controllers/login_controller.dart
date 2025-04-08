@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import '../../../models/user.dart';
-import '../../../sevices/api_service.dart';
+import '../../../services/api_service.dart';
 import '../../chat/controllers/chat_controller.dart';
 import '../../homesuperadmin/views/homesuperadmin_view.dart';
 import '../../notification/controllers/notification_controller.dart';
