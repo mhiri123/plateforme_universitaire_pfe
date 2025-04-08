@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import '../../../models/user.dart';
 import '../../../sevices/api_service.dart';
 import '../../chat/controllers/chat_controller.dart';
+import '../../homesuperadmin/views/homesuperadmin_view.dart';
 import '../../notification/controllers/notification_controller.dart';
 import '../../demandereo/controllers/demandereo_controller.dart';
 import '../../demandetransfert/controllers/demandetransfert_controller.dart';
@@ -33,13 +34,24 @@ class LoginController extends GetxController {
       Get.put(DemandeTransfertController());
       Get.put(DemandeReorientationController());
 
-      if (user.email == "admin@example.com") {
-        Get.offAll(() => AdminHomeScreen());
-      } else if (user.email == "teacher@example.com") {
-        Get.offAll(() => TeacherHomeScreen());
-      } else if (user.email == "student@example.com") {
-        Get.offAll(() => StudentHomeScreen());
+      switch (user.role) {
+        case "superadmin":
+          Get.offAll(() => SuperAdminHomeScreen());
+          break;
+        case "admin":
+          Get.offAll(() => AdminHomeScreen());
+          break;
+        case "teacher":
+          Get.offAll(() => TeacherHomeScreen());
+          break;
+        case "student":
+          Get.offAll(() => StudentHomeScreen());
+          break;
+        default:
+          Get.snackbar("Erreur", "Rôle utilisateur inconnu",
+              backgroundColor: Colors.red, colorText: Colors.white);
       }
+
     } catch (e) {
       Get.snackbar("Erreur", "Identifiants incorrects",
           backgroundColor: Colors.red, colorText: Colors.white);
@@ -48,3 +60,4 @@ class LoginController extends GetxController {
     isLoading.value = false;
   }
 }
+

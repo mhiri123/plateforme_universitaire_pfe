@@ -11,7 +11,7 @@ class ChatController extends GetxController {
   final TextEditingController messageController = TextEditingController();
 
   // Fonction pour envoyer un message
-  void sendMessage() {
+  void sendMessage(String message) {
     String messageText = messageController.text.trim();
 
     if (messageText.isNotEmpty) {

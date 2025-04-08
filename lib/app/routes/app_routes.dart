@@ -19,6 +19,16 @@ abstract class Routes {
   static const PROCEDURES = _Paths.PROCEDURES;
   static const DEMANDETRANSFERT = _Paths.DEMANDETRANSFERT;
   static const TRAITERDEMANDE = _Paths.TRAITERDEMANDE;
+  static const DASHBOARD = _Paths.DASHBOARD;
+  static const FACULTY_MANAGEMENT = _Paths.FACULTY_MANAGEMENT;
+  static const ADMIN_MANAGEMENT = _Paths.ADMIN_MANAGEMENT;
+  static const USER_MANAGEMENT = _Paths.USER_MANAGEMENT;
+  static const REQUEST_MANAGEMENT = _Paths.REQUEST_MANAGEMENT;
+  static const PERMISSION_MANAGEMENT = _Paths.PERMISSION_MANAGEMENT;
+  static const FACULTY_DETAILS = _Paths.FACULTY_DETAILS;
+  static const USER_ACTIVATION = _Paths.USER_ACTIVATION;
+  static const ENVOYER_NOTIFICATION = _Paths.ENVOYER_NOTIFICATION;
+  static const HOMESUPERADMIN = _Paths.HOMESUPERADMIN;
 }
 
 abstract class _Paths {
@@ -39,4 +49,14 @@ abstract class _Paths {
   static const PROCEDURES = '/procedures';
   static const DEMANDETRANSFERT = '/demandetransfert';
   static const TRAITERDEMANDE = '/traiterdemande';
+  static const DASHBOARD = '/dashboard';
+  static const FACULTY_MANAGEMENT = '/faculty-management';
+  static const ADMIN_MANAGEMENT = '/admin-management';
+  static const USER_MANAGEMENT = '/user-management';
+  static const REQUEST_MANAGEMENT = '/request-management';
+  static const PERMISSION_MANAGEMENT = '/permission-management';
+  static const FACULTY_DETAILS = '/faculty-details';
+  static const USER_ACTIVATION = '/user-activation';
+  static const ENVOYER_NOTIFICATION = '/envoyer-notification';
+  static const HOMESUPERADMIN = '/homesuperadmin';
 }

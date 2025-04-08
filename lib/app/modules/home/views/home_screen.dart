@@ -13,54 +13,26 @@ class HomeScreen extends StatelessWidget {
         elevation: 0,
         title: Row(
           children: [
-            Text("REO", style: TextStyle(color: Colors.red, fontSize: 22, fontWeight: FontWeight.bold)),
+            Text(
+              "REO",
+              style: TextStyle(color: Colors.red, fontSize: 22, fontWeight: FontWeight.bold),
+            ),
             Spacer(),
-            TextButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => HomeScreen()),
-                );
-              },
-              child: Text("HOME", style: TextStyle(color: Colors.black)),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => NewsScreen()),
-                );
-              },
-              child: Text("NEWS", style: TextStyle(color: Colors.black)),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AboutUsScreen()),
-                );
-              },
-              child: Text("ABOUT US", style: TextStyle(color: Colors.black)),
-            ),
-            TextButton(onPressed: () {}, child: Text("SERVICES", style: TextStyle(color: Colors.black))),
-            TextButton(onPressed: () {}, child: Text("CONTACT", style: TextStyle(color: Colors.black))),
+            _buildAppBarButton(context, "HOME", () {}),
+            _buildAppBarButton(context, "NEWS", () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => NewsScreen()));
+            }),
+            _buildAppBarButton(context, "ABOUT US", () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => AboutUsScreen()));
+            }),
+            _buildAppBarButton(context, "SERVICES", () {}),
+            _buildAppBarButton(context, "CONTACT", () {}),
             SizedBox(width: 20),
-            ElevatedButton(
-              onPressed: () {},
-              child: Text("ENQUIRE TODAY"),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            ),
+            _buildElevatedButton("ENQUIRE TODAY", Colors.red, () {}),
             SizedBox(width: 10),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginScreen()),
-                );
-              },
-              child: Text("LOGIN"),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            ),
+            _buildElevatedButton("LOGIN", Colors.red, () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
+            }),
           ],
         ),
       ),
@@ -85,22 +57,11 @@ class HomeScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => ProceduresScreen()),
-                        );
-                      },
-                      child: Text("VIEW PROCEDURES"),
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                    ),
+                    _buildElevatedButton("VIEW PROCEDURES", Colors.blue, () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => ProceduresScreen()));
+                    }),
                     SizedBox(width: 10),
-                    ElevatedButton(
-                      onPressed: () {},
-                      child: Text("CONTACT US"),
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                    ),
+                    _buildElevatedButton("CONTACT US", Colors.red, () {}),
                   ],
                 ),
               ],
@@ -108,6 +69,23 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  // Function to create AppBar buttons
+  Widget _buildAppBarButton(BuildContext context, String label, Function onPressed) {
+    return TextButton(
+      onPressed: () => onPressed(),
+      child: Text(label, style: TextStyle(color: Colors.black)),
+    );
+  }
+
+  // Function to create Elevated buttons
+  Widget _buildElevatedButton(String label, Color color, Function onPressed) {
+    return ElevatedButton(
+      onPressed: () => onPressed(),
+      child: Text(label),
+      style: ElevatedButton.styleFrom(backgroundColor: color),
     );
   }
 }

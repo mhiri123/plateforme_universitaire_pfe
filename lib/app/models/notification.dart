@@ -1,13 +1,14 @@
-class AppNotification {
-  final String title;
+class NotificationModel {
+  final String titre;
   final String message;
-  final DateTime timestamp;
-  final String recipientRole;
+  final String recipient; // Destinataire
+  final DateTime timestamp; // Horodatage
+  final int id; // Identifiant unique
 
-  AppNotification({
-    required this.title,
+  NotificationModel({
+    required this.titre,
     required this.message,
-    required this.timestamp,
-    required this.recipientRole,
-  });
+    required this.recipient,
+    required this.id,
+  }) : timestamp = DateTime.now(); // Enregistre le moment de la création
 }

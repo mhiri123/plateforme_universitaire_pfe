@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import '../../../models/message.dart';
 import '../controllers/chat_controller.dart';
 
-
 class ChatScreen extends StatelessWidget {
   final ChatController chatController = Get.put(ChatController());
 
@@ -54,7 +53,9 @@ class ChatScreen extends StatelessWidget {
                   IconButton(
                     icon: Icon(Icons.send),
                     onPressed: () {
-                      chatController.sendMessage();
+                      // Passer le texte du message à la méthode sendMessage
+                      String messageText = chatController.messageController.text;
+                      chatController.sendMessage(messageText);  // Passer le texte ici
                     },
                   ),
                 ],

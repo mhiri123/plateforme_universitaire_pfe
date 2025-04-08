@@ -31,25 +31,37 @@ class TraiterDemandeScreen extends StatelessWidget {
                   return ListTile(
                     title: Text('$demandeType demande ${index + 1}'),
                     subtitle: Text("Détails de la demande..."),
-                    trailing: IconButton(
-                      icon: Icon(Icons.check),
-                      onPressed: () {
-                        // Logic to approve the request
-                        // Vous pouvez appeler ici une méthode pour approuver la demande
-                        if (demandeType == 'Réorientation') {
-                          demandeReorientationController.soumettreDemandeReorientation(
-                              'Nom', 'Prénom', '12345', '01/01/2000', 'email@example.com',
-                              '0123456789', 'Informatique', '2ème année', 'Systèmes', 'Mathématiques',
-                              'Sciences', '01/09/2025', 'Motivation de l\'étudiant');
-                        } else if (demandeType == 'Transfert') {
-                          demandeTransfertController.soumettreDemandeTransfert(
-                              'Etudiant', 'Nom', 'Prénom', '12345', '01/01/2000', 'email@example.com',
-                              '0123456789', 'Université A', 'Sciences', 'Informatique', '2ème année',
-                              'Informatique', 'CDD', 'Université B', 'Mathématiques', '01/09/2025', 'Motivation de l\'étudiant');
-                        }
-                        Get.snackbar('Demande traitée', 'Demande approuvée avec succès',
-                            backgroundColor: Colors.green, colorText: Colors.white);
-                      },
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.check, color: Colors.green),
+                          onPressed: () {
+                            // Logique pour approuver la demande
+                            if (demandeType == 'Réorientation') {
+                              demandeReorientationController.soumettreDemandeReorientation(
+                                  'Nom', 'Prénom', '12345', '01/01/2000', 'email@example.com',
+                                  '0123456789', 'Informatique', '2ème année', 'Systèmes', 'Mathématiques',
+                                  'Sciences', '01/09/2025', 'Motivation de l\'étudiant');
+                            } else if (demandeType == 'Transfert') {
+                              demandeTransfertController.soumettreDemandeTransfert(
+                                  'Etudiant', 'Nom', 'Prénom', '12345', '01/01/2000', 'email@example.com',
+                                  '0123456789', 'Université A', 'Sciences', 'Informatique', '2ème année',
+                                  'Informatique', 'CDD', 'Université B', 'Mathématiques', '01/09/2025', 'Motivation de l\'étudiant');
+                            }
+                            Get.snackbar('Demande traitée', 'Demande approuvée avec succès',
+                                backgroundColor: Colors.green, colorText: Colors.white);
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.close, color: Colors.red),
+                          onPressed: () {
+                            // Logique pour refuser la demande
+                            Get.snackbar('Demande traitée', 'Demande refusée avec succès',
+                                backgroundColor: Colors.red, colorText: Colors.white);
+                          },
+                        ),
+                      ],
                     ),
                   );
                 },
@@ -61,3 +73,4 @@ class TraiterDemandeScreen extends StatelessWidget {
     );
   }
 }
+

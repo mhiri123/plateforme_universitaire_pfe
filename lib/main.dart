@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'app/modules/dashboard/views/dashboard_view.dart';
 import 'app/modules/home/views/home_screen.dart';
+import 'app/modules/homeadmin/views/homeadmin_view.dart';
+import 'app/modules/homesuperadmin/views/homesuperadmin_view.dart';
 import 'app/modules/hometeacher/views/hometeacher_view.dart';
 import 'app/modules/login/views/login_view.dart';
 import 'app/modules/news/views/news_view.dart';
@@ -27,7 +30,6 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        home: HomeScreen(),
-    );
-  }
+        home: SuperAdminHomeScreen (),);
+    }
 }
