@@ -1,0 +1,111 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+class DemandeTransfertEtudiantController extends GetxController {
+  // États observables
+  RxBool isLoading = false.obs;
+  RxString errorMessage = ''.obs;
+
+  // Méthode de soumission de demande
+  Future<void> soumettreDemandeTransfertEtudiant({
+    required String nom,
+    required String prenom,
+    required String email,
+    required String faculteActuelle,
+    required String faculteDestination,
+    required String filiere,
+    required String motivation,
+    File? document,
+  }) async {
+    try {
+      // Validation des données
+      if (_validateInputs(
+          nom,
+          prenom,
+          email,
+          faculteActuelle,
+          faculteDestination,
+          filiere,
+          motivation
+      )) {
+        // Mettre l'état en chargement
+        isLoading.value = true;
+
+        // Simulation de la soumission de la demande (à remplacer par un appel API réel)
+        await Future.delayed(Duration(seconds: 2));
+
+        // Affichage d'un message de succès
+        Get.snackbar(
+          'Succès',
+          'Votre demande de transfert a été soumise avec succès.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      // Gestion des erreurs
+      errorMessage.value = e.toString();
+      Get.snackbar(
+        'Erreur',
+        errorMessage.value,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      // Fin du chargement
+      isLoading.value = false;
+    }
+  }
+
+  // Méthode de validation des entrées
+  bool _validateInputs(
+      String nom,
+      String prenom,
+      String email,
+      String faculteActuelle,
+      String faculteDestination,
+      String filiere,
+      String motivation,
+      ) {
+    // Vérification des champs obligatoires
+    if (nom.isEmpty || prenom.isEmpty || email.isEmpty) {
+      Get.snackbar(
+        'Erreur',
+        'Veuillez remplir tous les champs obligatoires.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+
+    // Vérification que les facultés sont différentes
+    if (faculteActuelle == faculteDestination) {
+      Get.snackbar(
+        'Erreur',
+        'La faculté de destination doit être différente de la faculté actuelle.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+
+    // Vérification de la motivation
+    if (motivation.length < 10) {
+      Get.snackbar(
+        'Erreur',
+        'La motivation doit contenir au moins 10 caractères.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+
+    return true;
+  }
+}

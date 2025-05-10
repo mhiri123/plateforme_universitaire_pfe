@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../faculty_details/controllers/faculty_details_controller.dart';
-import '../controllers/faculty_details_controller.dart';
+
+// Assurez-vous que le bon contrôleur est utilisé
+import '../../../models/faculty.dart';
+import '../controllers/faculty_details_controller.dart'; // Importer le modèle Faculty
 
 class FacultyDetailsScreen extends StatelessWidget {
-  final FacultyController facultyController = Get.find<FacultyController>();
+  final FacultyController facultyController = Get.find<FacultyController>(); // Assurez-vous que le bon contrôleur est utilisé
   final int facultyId;
 
   FacultyDetailsScreen({Key? key, required this.facultyId}) : super(key: key);
@@ -31,6 +33,10 @@ class FacultyDetailsScreen extends StatelessWidget {
             );
           }
 
+          // Simuler des données pour les administrateurs et étudiants
+          List<String> admins = ["Admin 1", "Admin 2"]; // Remplacer par les administrateurs réels si disponibles
+          List<String> students = ["Alice", "Bob"]; // Remplacer par les étudiants réels si disponibles
+
           return SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,9 +46,9 @@ class FacultyDetailsScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 16),
-                _buildSection("Administrateurs", faculty.admins.map((a) => a.name).toList()),
+                _buildSection("Administrateurs", admins),
                 SizedBox(height: 16),
-                _buildSection("Étudiants", faculty.students.map((s) => s.name).toList()),
+                _buildSection("Étudiants", students),
               ],
             ),
           );

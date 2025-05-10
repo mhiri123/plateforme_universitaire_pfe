@@ -1,12 +1,12 @@
 import 'package:get/get.dart';
 
-import '../controllers/envoyer_notification_controller.dart';
+import '../controllers/notification_sender_controller.dart';
 
 class EnvoyerNotificationBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<NotificationController>(
-      () => NotificationController(),
+    Get.lazyPut<NotificationSenderController>(
+      () => NotificationSenderController(),
     );
   }
 }

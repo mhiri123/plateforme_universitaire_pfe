@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import '../models/user.dart';
+import '../models/auth_response.dart';
 
 class UserService {
   final Dio _dio;
@@ -28,8 +28,14 @@ class UserService {
     await _dio.put('/users/$id/status', data: data);
   }
 
-  // ✅ Mettre à jour les infos utilisateur
+  // Mettre à jour les infos utilisateur
   Future<void> updateUser(int id, User user) async {
     await _dio.put('/users/$id', data: user.toJson());
+  }
+
+  // Obtenir un utilisateur par son ID
+  Future<User> getUserById(int id) async {
+    final response = await _dio.get('/users/$id');
+    return User.fromJson(response.data);
   }
 }

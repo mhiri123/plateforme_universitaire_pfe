@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http; // ✅ renommé
+
 import '../controllers/admin_management_controller.dart';
 
 class AdminManagementScreen extends StatelessWidget {

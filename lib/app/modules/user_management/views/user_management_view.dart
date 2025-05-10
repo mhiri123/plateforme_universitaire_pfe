@@ -15,7 +15,7 @@ class UserManagementScreen extends StatelessWidget {
           itemBuilder: (context, index) {
             final user = userController.users[index];
             return ListTile(
-              title: Text(user.name),
+              title: Text('${user.prenom} ${user.nom}'), // Afficher le prénom et nom
               subtitle: Text(user.email),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,

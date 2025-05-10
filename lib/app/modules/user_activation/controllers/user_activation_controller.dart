@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import '../../../models/user.dart';
+import '../../../models/auth_response.dart';
 import '../../../services/user_service.dart';
 import 'package:dio/dio.dart';
 
@@ -71,7 +71,8 @@ class UserActivationController extends GetxController {
     } else {
       filteredUsers.assignAll(
         users.where((u) =>
-        u.name.toLowerCase().contains(query.toLowerCase()) ||
+        u.prenom.toLowerCase().contains(query.toLowerCase()) ||
+            u.nom.toLowerCase().contains(query.toLowerCase()) ||
             u.email.toLowerCase().contains(query.toLowerCase())
         ),
       );

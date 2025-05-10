@@ -1,11 +1,10 @@
 import 'package:get/get.dart';
-import '../../../models/faculty.dart'; // Assurez-vous que vous importez correctement vos modèles
-import '../../../models/admin.dart';  // Importer le modèle Admin
-import '../../../models/student.dart';  // Importer le modèle Student
+import 'package:dio/dio.dart';
+import '../../../models/faculty.dart';
 
 class FacultyController extends GetxController {
   var isLoading = true.obs;
-  var facultyList = <Faculty>[];
+  var facultyList = <Faculty>[].obs;
 
   @override
   void onInit() {
@@ -13,46 +12,32 @@ class FacultyController extends GetxController {
     fetchFaculties();
   }
 
-  // Récupérer les facultés fictives
   Future<void> fetchFaculties() async {
     try {
       isLoading(true);
-      // Simule un délai pour l'exemple
-      await Future.delayed(Duration(seconds: 2));
 
-      // Exemple de données simulées avec les paramètres requis
-      facultyList = [
-        Faculty(
-          id: 1,
-          name: "Faculté des Sciences",
-          admins: [
-            Admin(id: 1, name: "Dr. Dupont", email: "dr.dupont@example.com", isActive: true),
-            Admin(id: 2, name: "Dr. Martin", email: "dr.martin@example.com", isActive: true),
-          ],
-          students: [
-            Student(id: 3, name: "Alice", email: "alice@example.com", isActive: true),
-            Student(id: 4, name: "Bob", email: "bob@example.com", isActive: false),
-          ],
-        ),
-        Faculty(
-          id: 2,
-          name: "Faculté de Médecine",
-          admins: [
-            Admin(id: 3, name: "Dr. Lefevre", email: "dr.lefevre@example.com", isActive: true),
-          ],
-          students: [
-            Student(id: 5, name: "Charlie", email: "charlie@example.com", isActive: true),
-          ],
-        ),
-      ];
+      final dio = Dio();
+      final response = await dio.get("http://192.168.1.17:8000/api/faculties");
+
+      if (response.statusCode == 200 && response.data != null) {
+        // 💡 Vérifie que response.data est bien une List
+        if (response.data is List) {
+          facultyList.value =
+              (response.data as List).map((e) => Faculty.fromJson(e)).toList();
+        } else {
+          print("⚠️ Données reçues inattendues : ${response.data}");
+        }
+      } else {
+        print("❌ Erreur API: ${response.statusCode}");
+      }
     } catch (e) {
-      print("Erreur lors du chargement des facultés : $e");
+      print("❌ Erreur lors du chargement des facultés : $e");
     } finally {
       isLoading(false);
     }
   }
+  List<Faculty> get faculties => facultyList;
 
-  // Méthode pour obtenir une faculté par son ID
   Faculty? getFacultyById(int id) {
     return facultyList.firstWhereOrNull((faculty) => faculty.id == id);
   }

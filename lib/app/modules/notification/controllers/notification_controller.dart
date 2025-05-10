@@ -1,38 +1,38 @@
+// controllers/notification_controller.dart
 import 'package:get/get.dart';
-import 'package:flutter/material.dart';
 import '../../../models/notification.dart';
+import '../../../services/notification_service.dart';
 
 class NotificationController extends GetxController {
-  var notifications = <NotificationModel>[].obs; // Liste des notifications
-  var nextId = 1.obs; // Compteur pour l'ID unique des notifications
+  final NotificationService _service = NotificationService();
+  var notifications = <NotificationModel>[].obs;
+  var unreadCount = 0.obs;
 
-  // Ajouter une notification
-  void envoyerNotification(String titre, String message, String recipient) {
-    var notification = NotificationModel(
-      titre: titre,
-      message: message,
-      recipient: recipient,
-      id: nextId.value,  // Attribuer l'ID à la notification
-    );
-
-    // Ajouter la notification à la liste
-    notifications.add(notification);
-
-    // Incrémenter l'ID pour la prochaine notification
-    nextId.value++;
-
-    // Afficher un snackbar pour informer l'utilisateur de l'envoi de la notification
-    Get.snackbar(
-      "Notification envoyée",
-      "Le message a été transmis.",
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-    );
+  @override
+  void onInit() {
+    super.onInit();
+    fetchNotifications();
   }
 
-  // Récupérer toutes les notifications
-  List<NotificationModel> getAllNotifications() {
-    return notifications;
+  Future<void> fetchNotifications() async {
+    try {
+      var fetchedNotifications = await _service.fetchNotifications();
+      notifications.assignAll(fetchedNotifications);
+      unreadCount.value = fetchedNotifications.where((n) => !n.isRead).length;
+    } catch (e) {
+      Get.snackbar('Erreur', 'Impossible de charger les notifications');
+    }
+  }
+
+  Future<void> markAsRead(int notificationId) async {
+    try {
+      await _service.markAsRead(notificationId);
+      var notification = notifications.firstWhere((n) => n.id == notificationId);
+      notification.isRead = true;
+      notifications.refresh();
+      unreadCount.value = notifications.where((n) => !n.isRead).length;
+    } catch (e) {
+      Get.snackbar('Erreur', 'Impossible de marquer la notification comme lue');
+    }
   }
 }

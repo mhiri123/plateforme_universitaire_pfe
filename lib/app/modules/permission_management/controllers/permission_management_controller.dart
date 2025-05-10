@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import '../../../models/permission.dart';
 
-
 class PermissionController extends GetxController {
   var permissions = <Permission>[].obs; // Liste des permissions observable
 
@@ -30,8 +29,15 @@ class PermissionController extends GetxController {
 
   // Ajouter une nouvelle permission
   void addPermission(Permission permission) {
-    permission.id = permissions.length + 1; // Génération simple d'ID
-    permissions.add(permission);
+    // Utilisation d'un compteur pour générer l'ID
+    int newId = permissions.isEmpty ? 1 : permissions.last.id + 1;
+    Permission newPermission = Permission(
+      id: newId,
+      role: permission.role,
+      access: permission.access,
+      isActive: permission.isActive.value,
+    );
+    permissions.add(newPermission);
   }
 
   // Supprimer une permission

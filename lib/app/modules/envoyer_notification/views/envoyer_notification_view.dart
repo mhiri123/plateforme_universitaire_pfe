@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../notification/controllers/notification_controller.dart';
+import '../../../models/notification.dart';
+import '../../envoyer_notification/controllers/notification_sender_controller.dart';
 
 class EnvoyerNotificationScreen extends StatelessWidget {
-  final NotificationController notificationController = Get.put(NotificationController());
+  final NotificationSenderController notificationController = Get.put(NotificationSenderController());
   final TextEditingController messageController = TextEditingController();
   final TextEditingController recipientController = TextEditingController();
 
@@ -29,9 +30,10 @@ class EnvoyerNotificationScreen extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     notificationController.envoyerNotification(
-                      "Titre de notification", // Titre de la notification
-                      messageController.text,  // Message
-                      recipientController.text, // Destinataire
+                      int.parse(recipientController.text), // Convertir en entier si c'est un ID utilisateur
+                      NotificationType.email, // Exemple de type (à ajuster selon vos besoins)
+                      "Titre de notification",
+                      messageController.text,
                     );
                     messageController.clear();
                     recipientController.clear();
@@ -49,7 +51,7 @@ class EnvoyerNotificationScreen extends StatelessWidget {
                   final notification = notificationController.notifications[index];
                   return ListTile(
                     title: Text(notification.message),
-                    subtitle: Text("À : ${notification.recipient} - ${notification.id}"),
+                    subtitle: Text("À : ${notification.userId} - ${notification.id}"),
                   );
                 },
               );

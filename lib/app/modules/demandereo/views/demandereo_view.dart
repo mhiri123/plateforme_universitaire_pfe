@@ -1,147 +1,221 @@
+import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/demandereo_controller.dart';
+import 'package:file_picker/file_picker.dart';
 
-class DemandeReorientationScreen extends StatefulWidget {
-  @override
-  _DemandeReorientationScreenState createState() => _DemandeReorientationScreenState();
-}
+import '../../faculty_details/controllers/faculty_details_controller.dart';
+import '../../home/controllers/user_controller.dart';
+import '../controllers/demande_reorientation_controller.dart';
 
-class _DemandeReorientationScreenState extends State<DemandeReorientationScreen> {
+class DemandeReorientationScreen extends StatelessWidget {
+  DemandeReorientationScreen({super.key});
+
   final _formKey = GlobalKey<FormState>();
-  final DemandeReorientationController demandeReorientationController = Get.put(DemandeReorientationController());
-
-  // Contrôleurs pour chaque champ
-  final TextEditingController nomController = TextEditingController();
-  final TextEditingController prenomController = TextEditingController();
-  final TextEditingController numeroEtudiantController = TextEditingController();
-  final TextEditingController dateNaissanceController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController telephoneController = TextEditingController();
-  final TextEditingController filiereActuelleController = TextEditingController();
-  final TextEditingController anneeEtudeController = TextEditingController();
-  final TextEditingController departementController = TextEditingController();
-  final TextEditingController nouvelleFiliereController = TextEditingController();
-  final TextEditingController departementSouhaiteController = TextEditingController();
-  final TextEditingController dateChangementController = TextEditingController();
   final TextEditingController motivationController = TextEditingController();
+  final TextEditingController newFiliereController = TextEditingController();
+
+  final RxString selectedDocumentPath = ''.obs;
+  final RxString selectedDocumentName = ''.obs;
+
+  final FacultyController facultyController = Get.put(FacultyController());
+  final UserController userController = Get.find<UserController>();
+  final DemandeReorientationController demandeController = Get.put(DemandeReorientationController());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Demande de Réorientation")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              Text("Informations Personnelles", style: Theme.of(context).textTheme.titleLarge),
-              SizedBox(height: 10),
-              buildTextField(nomController, "Nom"),
-              buildTextField(prenomController, "Prénom"),
-              buildTextField(numeroEtudiantController, "Numéro d’étudiant"),
-              buildTextField(dateNaissanceController, "Date de naissance"),
-              buildTextField(emailController, "Adresse e-mail"),
-              buildTextField(telephoneController, "Numéro de téléphone"),
+      body: Stack(
+        children: [
+          _buildBackgroundImage(),
+          _buildBlurOverlay(),
+          _buildForm(context),
+        ],
+      ),
+    );
+  }
 
-              SizedBox(height: 20),
+  Widget _buildBackgroundImage() => Image.asset(
+    'assets/images/form.jpg',
+    fit: BoxFit.cover,
+    width: double.infinity,
+    height: double.infinity,
+  );
 
-              Text("Situation Actuelle", style: Theme.of(context).textTheme.titleLarge),
-              SizedBox(height: 10),
-              buildTextField(filiereActuelleController, "Filière actuelle"),
-              buildTextField(anneeEtudeController, "Année d’étude"),
-              buildTextField(departementController, "Département/Faculté"),
+  Widget _buildBlurOverlay() => BackdropFilter(
+    filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+    child: Container(color: Colors.black.withOpacity(0.3)),
+  );
 
-              SizedBox(height: 20),
-
-              Text("Demande de Réorientation", style: Theme.of(context).textTheme.titleLarge),
-              SizedBox(height: 10),
-              buildTextField(nouvelleFiliereController, "Nouvelle filière souhaitée"),
-              buildTextField(departementSouhaiteController, "Département/Faculté (si applicable)"),
-              buildTextField(dateChangementController, "Date souhaitée pour le changement"),
-
-              SizedBox(height: 20),
-
-              Text("Motivation", style: Theme.of(context).textTheme.titleLarge),
-              SizedBox(height: 10),
-              TextFormField(
-                controller: motivationController,
-                decoration: InputDecoration(
-                  labelText: "Raisons de la réorientation",
-                  hintText: "Expliquer brièvement votre traiterdemande",
-                  border: OutlineInputBorder(),
+  Widget _buildForm(BuildContext context) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Container(
+          width: 600,
+          padding: const EdgeInsets.all(30),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.blue, width: 2),
+          ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                const Text(
+                  'Demande de Réorientation',
+                  style: TextStyle(
+                      fontSize: 28,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold),
                 ),
-                maxLines: 4,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Veuillez expliquer votre motivation.";
-                  }
-                  return null;
-                },
-              ),
-
-              SizedBox(height: 20),
-
-              // Documents à Joindre
-              Text("Documents à Joindre (si requis)", style: Theme.of(context).textTheme.titleLarge),
-              SizedBox(height: 10),
-              buildTextField(null, "Relevé de notes"),
-              buildTextField(null, "Lettre de motivation"),
-              buildTextField(null, "Autres :"),
-
-              SizedBox(height: 20),
-
-              // Bouton de Soumission
-              Obx(() {
-                return demandeReorientationController.isLoading.value
-                    ? Center(child: CircularProgressIndicator())
-                    : ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState?.validate() ?? false) {
-                      demandeReorientationController.soumettreDemandeReorientation(
-                        nomController.text,
-                        prenomController.text,
-                        numeroEtudiantController.text,
-                        dateNaissanceController.text,
-                        emailController.text,
-                        telephoneController.text,
-                        filiereActuelleController.text,
-                        anneeEtudeController.text,
-                        departementController.text,
-                        nouvelleFiliereController.text,
-                        departementSouhaiteController.text,
-                        dateChangementController.text,
-                        motivationController.text,
-                      );
-                    }
-                  },
-                  child: Text("Soumettre la traiterdemande"),
-                );
-              }),
-            ],
+                const SizedBox(height: 30),
+                const Divider(color: Colors.white),
+                _section("Informations Personnelles", Icons.person),
+                _buildReadonlyField("Nom", userController.getNom()),
+                _buildReadonlyField("Prénom", userController.getPrenom()),
+                _buildReadonlyField("Filière actuelle", userController.getFiliere()),
+                _buildReadonlyField("Niveau", userController.getNiveauLibelle()),
+                _buildReadonlyField("Faculté actuelle", userController.getFaculte()),
+                const Divider(color: Colors.white),
+                _section("Réorientation Souhaitée", Icons.school),
+                _styledField(newFiliereController, "Nouvelle filière souhaitée"),
+                _styledField(motivationController, "Motivation", maxLines: 3),
+                const Divider(color: Colors.white),
+                _section("Pièce jointe", Icons.attach_file),
+                _buildDocumentPickerButton(context),
+                const SizedBox(height: 20),
+                _buildSubmitButton(),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget buildTextField(TextEditingController? controller, String label) {
+  Widget _buildReadonlyField(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.only(bottom: 14),
       child: TextFormField(
-        controller: controller,
+        initialValue: value,
+        readOnly: true,
+        style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
         decoration: InputDecoration(
           labelText: label,
-          border: OutlineInputBorder(),
+          filled: true,
+          fillColor: Colors.white.withOpacity(0.85),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return "Ce champ est requis.";
-          }
-          return null;
-        },
       ),
+    );
+  }
+
+  Widget _styledField(TextEditingController controller, String label,
+      {int maxLines = 1}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15.0),
+      child: TextFormField(
+        controller: controller,
+        maxLines: maxLines,
+        style: const TextStyle(color: Colors.black),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: const TextStyle(color: Colors.black),
+          filled: true,
+          fillColor: Colors.white.withOpacity(0.85),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        validator: (value) =>
+        value == null || value.isEmpty ? 'Ce champ est requis' : null,
+      ),
+    );
+  }
+
+  Widget _buildDocumentPickerButton(BuildContext context) {
+    return Obx(() => ElevatedButton.icon(
+      onPressed: () => _pickDocument(),
+      icon: const Icon(Icons.upload_file),
+      label: Text(
+        selectedDocumentName.value.isNotEmpty
+            ? selectedDocumentName.value
+            : "Ajouter un document justificatif",
+        overflow: TextOverflow.ellipsis,
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: selectedDocumentPath.value.isEmpty
+            ? Colors.white
+            : Colors.green,
+        foregroundColor: selectedDocumentPath.value.isEmpty
+            ? Colors.black
+            : Colors.white,
+        minimumSize: const Size(double.infinity, 50),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    ));
+  }
+
+  Future<void> _pickDocument() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    if (result != null && result.files.single.path != null) {
+      selectedDocumentPath.value = result.files.single.path!;
+      selectedDocumentName.value = result.files.single.name;
+    }
+  }
+
+  Widget _buildSubmitButton() {
+    return ElevatedButton.icon(
+      onPressed: () async {
+        if (_formKey.currentState!.validate()) {
+          if (selectedDocumentPath.value.isEmpty) {
+            Get.snackbar("Erreur", "Veuillez ajouter un document justificatif.",
+                backgroundColor: Colors.redAccent.shade100,
+                snackPosition: SnackPosition.BOTTOM);
+            return;
+          }
+
+          final file = File(selectedDocumentPath.value);
+
+          await demandeController.soumettreDemandeReorientation(
+            nouvelleFiliere: newFiliereController.text,
+            motivation: motivationController.text,
+            pieceJustificative: file,
+          );
+
+          newFiliereController.clear();
+          motivationController.clear();
+          selectedDocumentPath.value = '';
+          selectedDocumentName.value = '';
+        }
+      },
+      icon: const Icon(Icons.send),
+      label: const Text("Soumettre"),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.blueAccent,
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 4,
+      ),
+    );
+  }
+
+  Widget _section(String title, IconData icon) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: Colors.white),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: const TextStyle(
+                  color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        const SizedBox(height: 15),
+      ],
     );
   }
 }

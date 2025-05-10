@@ -14,7 +14,7 @@ class HomeScreen extends StatelessWidget {
         title: Row(
           children: [
             Text(
-              "REO",
+              "EduFlow",
               style: TextStyle(color: Colors.red, fontSize: 22, fontWeight: FontWeight.bold),
             ),
             Spacer(),

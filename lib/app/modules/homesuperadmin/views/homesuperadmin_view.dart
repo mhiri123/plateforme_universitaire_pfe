@@ -63,7 +63,7 @@ class SuperAdminHomeScreen extends StatelessWidget {
                 ),
             ],
           ),
-          onPressed: controller.navigateToNotificationManagement,
+          onPressed: () => _navigateToRoute(Routes.NOTIFICATION),
         )),
       ],
     );
@@ -116,34 +116,17 @@ class SuperAdminHomeScreen extends StatelessWidget {
   }
 
   void _navigateToRoute(String route) {
-    switch(route) {
-      case Routes.HOME:
-        controller.navigateToDashboard();
-        break;
-      case Routes.FACULTY_MANAGEMENT:
-        controller.navigateToFacultyManagement();
-        break;
-      case Routes.ADMIN_MANAGEMENT:
-        controller.navigateToAdminManagement();
-        break;
-      case Routes.USER_MANAGEMENT:
-        controller.navigateToUserManagement();
-        break;
-      case Routes.REQUEST_MANAGEMENT:
-        controller.navigateToRequestManagement();
-        break;
-      case Routes.PERMISSION_MANAGEMENT:
-        controller.navigateToPermissionManagement();
-        break;
-      case Routes.CHAT:
-        controller.navigateToChat();
-        break;
-      case Routes.NOTIFICATION:
-        controller.navigateToNotificationManagement();
-        break;
-      default:
-        Get.toNamed(route);
-    }
+    if (Get.isDialogOpen ?? false) Get.back();
+    if (Get.currentRoute == route) return;
+
+    Get.toNamed(route)?.catchError((error) {
+      Get.snackbar(
+        'Erreur',
+        'Impossible d\'accéder à cette fonctionnalité',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 3),
+      );
+    });
   }
 
   Widget _buildLogoutTile() {
@@ -183,7 +166,7 @@ class SuperAdminHomeScreen extends StatelessWidget {
               _buildSectionTitle("Outils Secondaires"),
               const SizedBox(height: 10),
               _buildSecondaryFeaturesGrid(),
-              const SizedBox(height: 20), // Espace supplémentaire pour le scrolling
+              const SizedBox(height: 20),
             ],
           ),
         );
@@ -240,24 +223,14 @@ class SuperAdminHomeScreen extends StatelessWidget {
   }
 
   Widget _buildMainFeaturesGrid() {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 10.0,
-        mainAxisSpacing: 10.0,
-        childAspectRatio: 0.9, // Réduit encore le ratio
-      ),
-      itemCount: 4,
-      itemBuilder: (context, index) {
-        final item = dashboardItems[index];
-        return _buildFeatureCard(item);
-      },
-    );
+    return _buildFeatureGrid(dashboardItems.sublist(0, 4));
   }
 
   Widget _buildSecondaryFeaturesGrid() {
+    return _buildFeatureGrid(dashboardItems.sublist(4));
+  }
+
+  Widget _buildFeatureGrid(List<Map<String, dynamic>> items) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -265,19 +238,18 @@ class SuperAdminHomeScreen extends StatelessWidget {
         crossAxisCount: 2,
         crossAxisSpacing: 10.0,
         mainAxisSpacing: 10.0,
-        childAspectRatio: 0.9, // Réduit encore le ratio
+        childAspectRatio: 0.9,
       ),
-      itemCount: dashboardItems.length - 4,
+      itemCount: items.length,
       itemBuilder: (context, index) {
-        final item = dashboardItems[index + 4];
-        return _buildFeatureCard(item);
+        return _buildFeatureCard(items[index]);
       },
     );
   }
 
   Widget _buildFeatureCard(Map<String, dynamic> item) {
-    return SizedBox( // Utilisation de SizedBox pour contrôler la hauteur
-      height: 160, // Hauteur fixe
+    return SizedBox(
+      height: 160,
       child: Card(
         elevation: 3,
         shape: RoundedRectangleBorder(
@@ -302,7 +274,7 @@ class SuperAdminHomeScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(item["icon"], size: 28, color: Colors.white), // Taille réduite
+                Icon(item["icon"], size: 28, color: Colors.white),
                 const SizedBox(height: 8),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -311,7 +283,7 @@ class SuperAdminHomeScreen extends StatelessWidget {
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: 13, // Police encore plus petite
+                      fontSize: 13,
                     ),
                     textAlign: TextAlign.center,
                     maxLines: 2,
@@ -328,7 +300,7 @@ class SuperAdminHomeScreen extends StatelessWidget {
 }
 
 final List<Map<String, dynamic>> menuItems = [
-  {"icon": Icons.dashboard, "title": "Tableau de Bord", "route": Routes.HOME},
+  {"icon": Icons.dashboard, "title": "Tableau de Bord", "route": Routes.HOMESUPERADMIN},
   {"icon": Icons.school, "title": "Facultés", "route": Routes.FACULTY_MANAGEMENT},
   {"icon": Icons.admin_panel_settings, "title": "Administrateurs", "route": Routes.ADMIN_MANAGEMENT},
   {"icon": Icons.people, "title": "Utilisateurs", "route": Routes.USER_MANAGEMENT},

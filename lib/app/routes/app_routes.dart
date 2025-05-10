@@ -17,7 +17,7 @@ abstract class Routes {
   static const ABOUTUS = _Paths.ABOUTUS;
   static const NEWS = _Paths.NEWS;
   static const PROCEDURES = _Paths.PROCEDURES;
-  static const DEMANDETRANSFERT = _Paths.DEMANDETRANSFERT;
+  static const DEMANDETRANSFERTETUDIANT = _Paths.DEMANDETRANSFERT;
   static const TRAITERDEMANDE = _Paths.TRAITERDEMANDE;
   static const DASHBOARD = _Paths.DASHBOARD;
   static const FACULTY_MANAGEMENT = _Paths.FACULTY_MANAGEMENT;
@@ -29,6 +29,9 @@ abstract class Routes {
   static const USER_ACTIVATION = _Paths.USER_ACTIVATION;
   static const ENVOYER_NOTIFICATION = _Paths.ENVOYER_NOTIFICATION;
   static const HOMESUPERADMIN = _Paths.HOMESUPERADMIN;
+  static const UNKNOWN_ROLE = _Paths.UNKNOWN_ROLE;
+  static const DEMANDETRANSFETENSEIGNANT = _Paths.DEMANDETRANSFETENSEIGNANT;
+  static const TRAITERDEMANDE_REO = _Paths.TRAITERDEMANDE_REO;
 }
 
 abstract class _Paths {
@@ -40,14 +43,14 @@ abstract class _Paths {
   static const HOMEADMIN = '/homeadmin';
   static const HOMESTUDENT = '/homestudent';
   static const DEMANDEREO = '/demandereo';
-  static const LOGIN = '/login';
+  static const LOGIN = '/admin/login';
   static const CHAT = '/chat';
   static const DEMANDE = '/traiterdemande';
   static const NOTIFICATION = '/notification';
   static const ABOUTUS = '/aboutus';
   static const NEWS = '/news';
   static const PROCEDURES = '/procedures';
-  static const DEMANDETRANSFERT = '/demandetransfert';
+  static const DEMANDETRANSFERT = '/demandetransfert_etudiant';
   static const TRAITERDEMANDE = '/traiterdemande';
   static const DASHBOARD = '/dashboard';
   static const FACULTY_MANAGEMENT = '/faculty-management';
@@ -59,4 +62,7 @@ abstract class _Paths {
   static const USER_ACTIVATION = '/user-activation';
   static const ENVOYER_NOTIFICATION = '/envoyer-notification';
   static const HOMESUPERADMIN = '/homesuperadmin';
+  static const UNKNOWN_ROLE = '/unknown-role';
+  static const DEMANDETRANSFETENSEIGNANT = '/demandetransfetenseignant';
+  static const TRAITERDEMANDE_REO = '/traiterdemande-reo';
 }

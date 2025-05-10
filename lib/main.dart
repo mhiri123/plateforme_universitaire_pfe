@@ -1,35 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'app/modules/dashboard/views/dashboard_view.dart';
-import 'app/modules/home/views/home_screen.dart';
-import 'app/modules/homeadmin/views/homeadmin_view.dart';
-import 'app/modules/homesuperadmin/views/homesuperadmin_view.dart';
-import 'app/modules/hometeacher/views/hometeacher_view.dart';
-import 'app/modules/login/views/login_view.dart';
-import 'app/modules/news/views/news_view.dart';
-import 'app/modules/procedures/views/procedures_view.dart';
+import 'package:get_storage/get_storage.dart';
+import 'app/routes/app_pages.dart';
+import 'app/services/dependency_service.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return GetMaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'REO Platform',
-        theme: ThemeData(
-          primarySwatch: Colors.red,
-          textTheme: TextTheme(
-            titleLarge: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
-          ),
-          buttonTheme: ButtonThemeData(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-        ),
-        home: SuperAdminHomeScreen (),);
-    }
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await GetStorage.init();
+  DependencyService.init();
+  
+  runApp(
+    GetMaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: "Plateforme Universitaire",
+      initialRoute: AppPages.INITIAL,
+      getPages: AppPages.routes,
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+    ),
+  );
 }

@@ -21,14 +21,14 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Image de fond
+          // Background Image
           Positioned.fill(
             child: Image.asset(
-              "assets/images/login.jpeg", // Assurez-vous d'avoir cette image
+              "assets/images/login.jpeg", // Ensure this image exists
               fit: BoxFit.cover,
             ),
           ),
-          // Contenu principal
+          // Main Content
           Center(
             child: Container(
               padding: EdgeInsets.all(20),

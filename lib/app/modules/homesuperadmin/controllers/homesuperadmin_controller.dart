@@ -3,14 +3,14 @@ import '../../../routes/app_pages.dart';
 
 class SuperAdminHomeController extends GetxController {
   // Variables d'état
-  final isLoading = false.obs;
-  final notificationCount = 0.obs;
-  final pendingRequests = 0.obs;
+  var isLoading = false.obs;
+  var notificationCount = 0.obs;
+  var pendingRequests = 0.obs;
 
   // Listes observables
-  final faculties = <String>[].obs;
-  final admins = <String>[].obs;
-  final requests = <String>[].obs;
+  var faculties = <String>[].obs;
+  var admins = <String>[].obs;
+  var requests = <String>[].obs;
 
   @override
   void onInit() {
@@ -20,17 +20,17 @@ class SuperAdminHomeController extends GetxController {
 
   Future<void> fetchInitialData() async {
     try {
-      isLoading(true);
+      isLoading.value = true; // Utilisation de .value pour modifier l'état
       await Future.wait([
         loadFaculties(),
         loadAdmins(),
         loadRequests()
       ]);
-      notificationCount(3);
+      notificationCount.value = 3; // Mise à jour avec .value
     } catch (e) {
       Get.snackbar('Erreur', 'Échec du chargement initial des données');
     } finally {
-      isLoading(false);
+      isLoading.value = false;
     }
   }
 
@@ -54,28 +54,28 @@ class SuperAdminHomeController extends GetxController {
       "Demande de transfert 1",
       "Demande de réorientation 2"
     ]);
-    pendingRequests(requests.length);
+    pendingRequests.value = requests.length; // Utilisation de .value
   }
 
   Future<void> refreshAllData() async {
     try {
-      isLoading(true);
+      isLoading.value = true;
       await fetchInitialData();
       Get.snackbar('Succès', 'Données rafraîchies');
     } catch (e) {
       Get.snackbar('Erreur', 'Échec du rafraîchissement');
     } finally {
-      isLoading(false);
+      isLoading.value = false;
     }
   }
 
-  // Méthodes de navigation complètes
+  // Méthodes de navigation
   void navigateToDashboard() => Get.toNamed(Routes.HOME);
   void navigateToFacultyManagement() => Get.toNamed(Routes.FACULTY_MANAGEMENT);
   void navigateToAdminManagement() => Get.toNamed(Routes.ADMIN_MANAGEMENT);
   void navigateToUserManagement() => Get.toNamed(Routes.USER_MANAGEMENT);
   void navigateToRequestManagement() => Get.toNamed(Routes.REQUEST_MANAGEMENT);
   void navigateToPermissionManagement() => Get.toNamed(Routes.PERMISSION_MANAGEMENT);
-  void navigateToChat() => Get.toNamed(Routes.CHAT); // Méthode ajoutée
+  void navigateToChat() => Get.toNamed(Routes.CHAT);
   void navigateToNotificationManagement() => Get.toNamed(Routes.NOTIFICATION);
 }

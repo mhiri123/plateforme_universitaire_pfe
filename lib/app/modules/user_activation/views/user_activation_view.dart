@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../models/user.dart';
+import '../../../models/auth_response.dart';
 import '../controllers/user_activation_controller.dart';
 
 class UserActivationScreen extends StatelessWidget {
@@ -46,7 +46,7 @@ class UserActivationScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final user = userController.filteredUsers[index];
                   return ListTile(
-                    title: Text(user.name),
+                    title: Text('${user.prenom} ${user.nom}'), // Afficher prénom et nom
                     subtitle: Text(user.email),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -99,7 +99,8 @@ class UserActivationScreen extends StatelessWidget {
   }
 
   void _showAddUserDialog(BuildContext context) {
-    final nameController = TextEditingController();
+    final prenomController = TextEditingController();
+    final nomController = TextEditingController();
     final emailController = TextEditingController();
     String selectedRole = "student";
 
@@ -110,7 +111,8 @@ class UserActivationScreen extends StatelessWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: nameController, decoration: const InputDecoration(labelText: "Nom")),
+            TextField(controller: prenomController, decoration: const InputDecoration(labelText: "Prénom")),
+            TextField(controller: nomController, decoration: const InputDecoration(labelText: "Nom")),
             TextField(controller: emailController, decoration: const InputDecoration(labelText: "Email")),
             DropdownButton<String>(
               value: selectedRole,
@@ -129,7 +131,8 @@ class UserActivationScreen extends StatelessWidget {
             onPressed: () {
               final newUser = User(
                 id: 0,
-                name: nameController.text,
+                prenom: prenomController.text,
+                nom: nomController.text,
                 email: emailController.text,
                 role: selectedRole,
                 isActive: true,

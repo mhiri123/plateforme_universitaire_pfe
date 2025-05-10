@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "651386323302",
+    "project_id": "chat-e8ada",
+    "storage_bucket": "chat-e8ada.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:651386323302:android:3606f3d7a94fae9fc488a7",
+        "android_client_info": {
+          "package_name": "chat.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBYIV21FwCoGL4xPnzCuwL3YXE2v9BJRG0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

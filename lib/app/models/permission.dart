@@ -1,7 +1,7 @@
-import 'package:get/get_rx/src/rx_types/rx_types.dart';
+import 'package:get/get.dart';
 
 class Permission {
-  late final int id;
+  final int id;
   final String role;
   final String access;
   RxBool isActive;
@@ -13,5 +13,16 @@ class Permission {
     required bool isActive,
   }) : isActive = isActive.obs;
 
-  get name => null;
+  // Utilisé pour comparer avec hasPermission(...)
+  String get name => access;
+
+  // Factory pour créer une instance depuis un JSON
+  factory Permission.fromJson(Map<String, dynamic> json) {
+    return Permission(
+      id: json['id'] ?? 0,
+      role: json['role'] ?? '',
+      access: json['access'] ?? json['name'] ?? '', // Support des 2 cas
+      isActive: json['is_active'] ?? true,
+    );
+  }
 }

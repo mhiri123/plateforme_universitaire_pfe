@@ -10,8 +10,10 @@ import '../modules/dashboard/bindings/dashboard_binding.dart';
 import '../modules/dashboard/views/dashboard_view.dart';
 import '../modules/demandereo/bindings/demandereo_binding.dart';
 import '../modules/demandereo/views/demandereo_view.dart';
-import '../modules/demandetransfert/bindings/demandetransfert_binding.dart';
-import '../modules/demandetransfert/views/demandetransfert_view.dart';
+import '../modules/demandetransfert_etudiant/bindings/demandetransfert_binding.dart';
+import '../modules/demandetransfert_etudiant/views/demandetransfertetudiant_screen.dart';
+import '../modules/demandetransfetenseignant/bindings/demandetransfetenseignant_binding.dart';
+import '../modules/demandetransfetenseignant/views/demandetransfertenseignant_screen.dart';
 import '../modules/envoyer_notification/bindings/envoyer_notification_binding.dart';
 import '../modules/envoyer_notification/views/envoyer_notification_view.dart';
 import '../modules/faculty_details/bindings/faculty_details_binding.dart';
@@ -20,6 +22,8 @@ import '../modules/faculty_management/bindings/faculty_management_binding.dart';
 import '../modules/faculty_management/views/faculty_management_view.dart';
 import '../modules/forgotpassword/bindings/forgotpassword_binding.dart';
 import '../modules/forgotpassword/views/forgotpassword_view.dart';
+import '../modules/home/bindings/home_binding.dart';
+import '../modules/home/views/home_screen.dart';
 import '../modules/homeadmin/bindings/homeadmin_binding.dart';
 import '../modules/homeadmin/views/homeadmin_view.dart';
 import '../modules/homestudent/bindings/homestudent_binding.dart';
@@ -44,6 +48,10 @@ import '../modules/signup/bindings/signup_binding.dart';
 import '../modules/signup/views/signup_view.dart';
 import '../modules/traiterdemande/bindings/traiterdemande_binding.dart';
 import '../modules/traiterdemande/views/traiterdemande_view.dart';
+import '../modules/traiterdemande_reo/bindings/traiterdemande_reo_binding.dart';
+import '../modules/traiterdemande_reo/views/traiterdemande_reo_view.dart';
+import '../modules/unknown_role/bindings/unknown_role_binding.dart';
+import '../modules/unknown_role/views/unknown_role_view.dart';
 import '../modules/user_activation/bindings/user_activation_binding.dart';
 import '../modules/user_activation/views/user_activation_view.dart';
 import '../modules/user_management/bindings/user_management_binding.dart';
@@ -57,6 +65,11 @@ class AppPages {
   static const INITIAL = Routes.HOME;
 
   static final routes = [
+    GetPage(
+      name: _Paths.HOME,
+      page: () => HomeScreen(),
+      binding: HomeBinding(),
+    ),
     GetPage(
       name: _Paths.FORGOTPASSWORD,
       page: () => ForgotPasswordScreen(),
@@ -119,19 +132,13 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.DEMANDETRANSFERT,
-      page: () => DemandeTransfertScreen(),
+      page: () => DemandeTransfertEtudiantScreen(),
       binding: DemandetransfertBinding(),
     ),
-    GetPage(
-      name: _Paths.TRAITERDEMANDE,
-      page: () => TraiterDemandeScreen(
-        demandeType: '',
-      ),
-      binding: TraiterdemandeBinding(),
-    ),
+
     GetPage(
       name: _Paths.DASHBOARD,
-      page: () => DashboardScreen (),
+      page: () => DashboardScreen(),
       binding: DashboardBinding(),
     ),
     GetPage(
@@ -156,7 +163,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.PERMISSION_MANAGEMENT,
-      page: () => PermissionManagementScreen (),
+      page: () => PermissionManagementScreen(),
       binding: PermissionManagementBinding(),
     ),
     GetPage(
@@ -179,5 +186,21 @@ class AppPages {
       page: () => SuperAdminHomeScreen(),
       binding: HomesuperadminBinding(),
     ),
+    GetPage(
+      name: _Paths.UNKNOWN_ROLE,
+      page: () => const UnknownRoleScreen(),
+      binding: UnknownRoleBinding(),
+    ),
+    GetPage(
+      name: _Paths.DEMANDETRANSFETENSEIGNANT,
+      page: () => DemandeTransfertEnseignantScreen(),
+      binding: DemandetransfetenseignantBinding(),
+    ),
+    GetPage(
+      name: _Paths.TRAITERDEMANDE_REO,
+      page: () => AdminTraitementDemandeReoScreen(),
+      binding: TraiterdemandeReoBinding(),
+    ),
   ];
 }
+
