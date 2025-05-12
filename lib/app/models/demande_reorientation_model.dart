@@ -10,7 +10,18 @@ enum StatutDemande {
   @JsonValue('acceptee')
   acceptee,
   @JsonValue('rejetee')
-  rejetee,
+  rejetee;
+
+  String get statutTexte {
+    switch (this) {
+      case StatutDemande.enAttente:
+        return 'En attente';
+      case StatutDemande.acceptee:
+        return 'Acceptée';
+      case StatutDemande.rejetee:
+        return 'Rejetée';
+    }
+  }
 }
 
 @JsonSerializable(explicitToJson: true)
@@ -18,15 +29,19 @@ class DemandeReorientation {
   @JsonKey(includeIfNull: false)
   final int? id;
 
+  @JsonKey(defaultValue: '')
   final String nom;
+
+  @JsonKey(defaultValue: '')
   final String prenom;
 
-  @JsonKey(name: 'filiere_actuelle_nom')
+  @JsonKey(name: 'filiere_actuelle_nom', defaultValue: '')
   final String filiereActuelleNom;  // Correspond au nom de la filière actuelle
 
-  @JsonKey(name: 'nouvelle_filiere_nom')
+  @JsonKey(name: 'nouvelle_filiere_nom', defaultValue: '')
   final String nouvelleFiliereNom;  // Correspond au nom de la nouvelle filière
 
+  @JsonKey(defaultValue: '')
   final String motivation;
 
   @JsonKey(
@@ -44,7 +59,9 @@ class DemandeReorientation {
   final DateTime? dateTraitement;
 
   @JsonKey(
-    name: 'status', // Correspond à 'status' dans la table Laravel
+    name: 'status',
+    fromJson: _statutFromJson,
+    toJson: _statutToJson,
     defaultValue: StatutDemande.enAttente,
   )
   final StatutDemande statut;
@@ -55,15 +72,18 @@ class DemandeReorientation {
   @JsonKey(name: 'piece_justificative', includeIfNull: false)
   final String? pieceJustificative;
 
+  @JsonKey(defaultValue: '')
   final String level; // Niveau d'études
+  
+  @JsonKey(name: 'faculty_name', defaultValue: '')
   final String facultyName; // Nom de la faculté
 
   DemandeReorientation({
     this.id,
     required this.nom,
     required this.prenom,
-    required this.filiereActuelleNom, // Nom de la filière actuelle
-    required this.nouvelleFiliereNom, // Nom de la nouvelle filière
+    required this.filiereActuelleNom,
+    required this.nouvelleFiliereNom,
     required this.motivation,
     this.dateCreation,
     this.dateTraitement,
@@ -73,6 +93,30 @@ class DemandeReorientation {
     required this.level,
     required this.facultyName,
   });
+
+  static StatutDemande _statutFromJson(String? value) {
+    switch (value) {
+      case 'en_attente':
+        return StatutDemande.enAttente;
+      case 'acceptee':
+        return StatutDemande.acceptee;
+      case 'rejetee':
+        return StatutDemande.rejetee;
+      default:
+        return StatutDemande.enAttente;
+    }
+  }
+
+  static String _statutToJson(StatutDemande statut) {
+    switch (statut) {
+      case StatutDemande.enAttente:
+        return 'en_attente';
+      case StatutDemande.acceptee:
+        return 'acceptee';
+      case StatutDemande.rejetee:
+        return 'rejetee';
+    }
+  }
 
   DemandeReorientation copyWith({
     StatutDemande? statut,
@@ -107,16 +151,4 @@ class DemandeReorientation {
       _$DemandeReorientationFromJson(json);
 
   Map<String, dynamic> toJson() => _$DemandeReorientationToJson(this);
-
-  // Helper pour affichage lisible du statut
-  String get statutTexte {
-    switch (statut) {
-      case StatutDemande.enAttente:
-        return 'En attente';
-      case StatutDemande.acceptee:
-        return 'Acceptée';
-      case StatutDemande.rejetee:
-        return 'Rejetée';
-    }
-  }
 }

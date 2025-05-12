@@ -10,21 +10,22 @@ DemandeReorientation _$DemandeReorientationFromJson(
         Map<String, dynamic> json) =>
     DemandeReorientation(
       id: (json['id'] as num?)?.toInt(),
-      nom: json['nom'] as String,
-      prenom: json['prenom'] as String,
-      filiereActuelleNom: json['filiere_actuelle_nom'] as String,
-      nouvelleFiliereNom: json['nouvelle_filiere_nom'] as String,
-      motivation: json['motivation'] as String,
+      nom: json['nom'] as String? ?? '',
+      prenom: json['prenom'] as String? ?? '',
+      filiereActuelleNom: json['filiere_actuelle_nom'] as String? ?? '',
+      nouvelleFiliereNom: json['nouvelle_filiere_nom'] as String? ?? '',
+      motivation: json['motivation'] as String? ?? '',
       dateCreation: DemandeReorientation._dateTimeFromJson(
           json['date_creation'] as String?),
       dateTraitement: DemandeReorientation._dateTimeFromJson(
           json['date_traitement'] as String?),
-      statut: $enumDecodeNullable(_$StatutDemandeEnumMap, json['status']) ??
-          StatutDemande.enAttente,
+      statut: json['status'] == null
+          ? StatutDemande.enAttente
+          : DemandeReorientation._statutFromJson(json['status'] as String?),
       commentaireAdmin: json['commentaire_admin'] as String?,
       pieceJustificative: json['piece_justificative'] as String?,
-      level: json['level'] as String,
-      facultyName: json['facultyName'] as String,
+      level: json['level'] as String? ?? '',
+      facultyName: json['faculty_name'] as String? ?? '',
     );
 
 Map<String, dynamic> _$DemandeReorientationToJson(
@@ -40,17 +41,11 @@ Map<String, dynamic> _$DemandeReorientationToJson(
           DemandeReorientation._dateTimeToJson(instance.dateCreation),
       'date_traitement':
           DemandeReorientation._dateTimeToJson(instance.dateTraitement),
-      'status': _$StatutDemandeEnumMap[instance.statut]!,
+      'status': DemandeReorientation._statutToJson(instance.statut),
       if (instance.commentaireAdmin case final value?)
         'commentaire_admin': value,
       if (instance.pieceJustificative case final value?)
         'piece_justificative': value,
       'level': instance.level,
-      'facultyName': instance.facultyName,
+      'faculty_name': instance.facultyName,
     };
-
-const _$StatutDemandeEnumMap = {
-  StatutDemande.enAttente: 'en_attente',
-  StatutDemande.acceptee: 'acceptee',
-  StatutDemande.rejetee: 'rejetee',
-};

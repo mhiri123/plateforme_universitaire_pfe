@@ -27,24 +27,26 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'prenom': instance.prenom,
       'email': instance.email,
       'role': instance.role,
-      'faculty': instance.faculty,
-      'filiere': instance.filiere,
+      if (instance.faculty case final value?) 'faculty': value,
+      if (instance.filiere case final value?) 'filiere': value,
       'niveau': instance.niveau,
-      'niveau_libelle': instance.niveauLibelle,
+      if (instance.niveauLibelle case final value?) 'niveau_libelle': value,
       'is_active': instance.isActive,
       'is_verified': instance.isVerified,
-      'token': instance.token,
+      if (instance.token case final value?) 'token': value,
     };
 
 AuthResponse _$AuthResponseFromJson(Map<String, dynamic> json) => AuthResponse(
-      message: json['message'] as String? ?? '',
+      status: json['status'] as String,
       user: User.fromJson(json['user'] as Map<String, dynamic>),
-      token: json['token'] as String,
+      token: json['token'] as String?,
+      message: json['message'] as String?,
     );
 
 Map<String, dynamic> _$AuthResponseToJson(AuthResponse instance) =>
     <String, dynamic>{
-      'message': instance.message,
+      'status': instance.status,
       'user': instance.user.toJson(),
-      'token': instance.token,
+      if (instance.token case final value?) 'token': value,
+      if (instance.message case final value?) 'message': value,
     };

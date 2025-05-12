@@ -31,7 +31,6 @@ String _getNiveauLibelle(int niveau) {
 @JsonSerializable(
   explicitToJson: true,
   includeIfNull: false,
-  createToJson: true,
 )
 class User {
   @JsonKey(name: 'id')
@@ -49,20 +48,20 @@ class User {
   @JsonKey(name: 'role')
   final String role;
 
-  @JsonKey(name: 'faculty', includeIfNull: true)
+  @JsonKey(name: 'faculty')
   final String? faculty;
 
-  @JsonKey(name: 'filiere', includeIfNull: true)
+  @JsonKey(name: 'filiere')
   final String? filiere;
 
   @JsonKey(
-      name: 'niveau',
-      fromJson: _parseNiveau,
-      defaultValue: 1
+    name: 'niveau',
+    fromJson: _parseNiveau,
+    defaultValue: 1
   )
   final int niveau;
 
-  @JsonKey(name: 'niveau_libelle', includeIfNull: true)
+  @JsonKey(name: 'niveau_libelle')
   final String? niveauLibelle;
 
   @JsonKey(name: 'is_active', defaultValue: false)
@@ -71,10 +70,10 @@ class User {
   @JsonKey(name: 'is_verified', defaultValue: false)
   final bool isVerified;
 
-  @JsonKey(includeIfNull: true)
+  @JsonKey(name: 'token')
   final String? token;
 
-  const User({
+  User({
     required this.id,
     required this.nom,
     required this.prenom,
@@ -88,24 +87,6 @@ class User {
     this.isVerified = false,
     this.token,
   });
-
-  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
-
-  Map<String, dynamic> toJson() => _$UserToJson(this);
-
-  String get fullName => '$prenom $nom';
-
-  String get displayNiveauLibelle {
-    return niveauLibelle ?? _getNiveauLibelle(niveau);
-  }
-
-  bool get isValidUser {
-    return id > 0 &&
-        nom.isNotEmpty &&
-        prenom.isNotEmpty &&
-        email.isNotEmpty &&
-        role.isNotEmpty;
-  }
 
   User copyWith({
     int? id,
@@ -137,55 +118,12 @@ class User {
     );
   }
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          (other is User &&
-              runtimeType == other.runtimeType &&
-              id == other.id &&
-              nom == other.nom &&
-              prenom == other.prenom &&
-              email == other.email &&
-              role == other.role &&
-              faculty == other.faculty &&
-              filiere == other.filiere &&
-              niveau == other.niveau &&
-              isActive == other.isActive &&
-              isVerified == other.isVerified &&
-              token == other.token);
+  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
+  Map<String, dynamic> toJson() => _$UserToJson(this);
 
-  @override
-  int get hashCode => Object.hash(
-    id,
-    nom,
-    prenom,
-    email,
-    role,
-    faculty,
-    filiere,
-    niveau,
-    isActive,
-    isVerified,
-    token,
-  );
-
-  @override
-  String toString() {
-    return '''
-User {
-  id: $id,
-  nom: $nom,
-  prenom: $prenom,
-  email: $email,
-  role: $role,
-  faculty: $faculty,
-  filiere: $filiere,
-  niveau: $niveau (${displayNiveauLibelle}),
-  isActive: $isActive,
-  isVerified: $isVerified,
-  token: $token
-}''';
-  }
+  String get fullName => '$prenom $nom';
+  String get displayNiveauLibelle => niveauLibelle ?? _getNiveauLibelle(niveau);
+  bool get isValidUser => id > 0 && nom.isNotEmpty && prenom.isNotEmpty && email.isNotEmpty && role.isNotEmpty;
 }
 
 @JsonSerializable(
@@ -193,46 +131,33 @@ User {
   includeIfNull: false,
 )
 class AuthResponse {
-  @JsonKey(name: 'message', defaultValue: '')
-  final String message;
+  @JsonKey(name: 'status')
+  final String status;
 
   @JsonKey(name: 'user')
   final User user;
 
   @JsonKey(name: 'token')
-  final String token;
+  final String? token;
+
+  @JsonKey(name: 'message')
+  final String? message;
 
   AuthResponse({
-    this.message = '',
+    required this.status,
     required this.user,
-    required this.token,
+    this.token,
+    this.message,
   });
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) => _$AuthResponseFromJson(json);
-
   Map<String, dynamic> toJson() => _$AuthResponseToJson(this);
 
-  // Méthode de validation complète
-  bool get isValid {
-    return user.isValidUser &&
-        token.isNotEmpty &&
-        token.length > 10;  // Exemple de validation de token
-  }
-
-  // Méthode pour obtenir un message d'erreur si l'authentification échoue
+  bool get isValid => user.isValidUser && token?.isNotEmpty == true && token!.length > 10;
+  
   String? get validationError {
     if (!user.isValidUser) return 'Informations utilisateur invalides';
-    if (token.isEmpty || token.length <= 10) return 'Token d\'authentification invalide';
+    if (token == null || token!.isEmpty || token!.length <= 10) return 'Token d\'authentification invalide';
     return null;
-  }
-
-  @override
-  String toString() {
-    return '''
-AuthResponse {
-  message: $message,
-  user: $user,
-  token: ${token.isNotEmpty ? '[MASKED]' : 'N/A'}
-}''';
   }
 }

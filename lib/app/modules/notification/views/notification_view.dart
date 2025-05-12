@@ -1,123 +1,182 @@
 // screens/notification_screen.dart
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import '../../../models/notification.dart';
-
+import 'package:get/get.dart';
 import '../controllers/notification_controller.dart';
+import '../../../models/notification_model.dart' as models;
+import 'package:timeago/timeago.dart' as timeago;
 
-class NotificationScreen extends StatefulWidget {
-  @override
-  _NotificationScreenState createState() => _NotificationScreenState();
-}
-
-class _NotificationScreenState extends State<NotificationScreen> {
-  final NotificationController _controller = NotificationController();
-  List<NotificationModel> _notifications = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadNotifications();
-  }
-
-  Future<void> _loadNotifications() async {
-    try {
-      setState(() {
-        _isLoading = true;
-      });
-
-      _notifications = await _controller.fetchNotifications() as List<NotificationModel>;
-
-      setState(() {
-        _isLoading = false;
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur de chargement des notifications')),
-      );
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  IconData _getIconByType(NotificationType type) {
-    switch (type) {
-      case NotificationType.demandeReorientation:
-        return Icons.swap_horiz;
-      case NotificationType.statutDemande:
-        return Icons.check_circle_outline;
-      case NotificationType.messageSysteme:
-        return Icons.info_outline;
-      case NotificationType.rappel:
-        return Icons.notifications_active;
-      default:
-        return Icons.mail_outline;
-    }
-  }
-
-  Future<void> _markAsRead(NotificationModel notification) async {
-    try {
-      await _controller.markAsRead(notification.id);
-      setState(() {
-        notification.isRead = true;
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Impossible de marquer comme lu')),
-      );
-    }
-  }
+class NotificationView extends GetView<NotificationController> {
+  const NotificationView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Notifications'),
+        title: const Text('Notifications'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.done_all),
+            tooltip: 'Tout marquer comme lu',
+            onPressed: () => controller.marquerToutCommeLues(),
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Actualiser',
+            onPressed: () => controller.chargerNotifications(),
+          ),
+        ],
       ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : _notifications.isEmpty
-          ? Center(child: Text('Aucune notification'))
-          : ListView.builder(
-        itemCount: _notifications.length,
-        itemBuilder: (context, index) {
-          final notification = _notifications[index];
-          return ListTile(
-            leading: Icon(
-              _getIconByType(notification.type),
-              color: notification.isRead ? Colors.grey : Colors.blue,
-            ),
-            title: Text(
-              notification.title,
-              style: TextStyle(
-                fontWeight: notification.isRead
-                    ? FontWeight.normal
-                    : FontWeight.bold,
-              ),
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (controller.error.isNotEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(notification.message),
-                SizedBox(height: 4),
+                const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                const SizedBox(height: 16),
                 Text(
-                  DateFormat('dd/MM/yyyy HH:mm')
-                      .format(notification.createdAt),
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                  controller.error.value,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.red),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => controller.chargerNotifications(),
+                  child: const Text('Réessayer'),
                 ),
               ],
             ),
-            trailing: !notification.isRead
-                ? IconButton(
-              icon: Icon(Icons.check_circle),
-              onPressed: () => _markAsRead(notification),
-            )
-                : null,
           );
-        },
+        }
+
+        if (controller.notifications.isEmpty) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.notifications_none, size: 64, color: Colors.grey),
+                SizedBox(height: 16),
+                Text(
+                  'Aucune notification',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return ListView.builder(
+          itemCount: controller.notifications.length,
+          itemBuilder: (context, index) {
+            final notification = controller.notifications[index];
+            return NotificationCard(
+              notification: notification,
+              onTap: () => controller.marquerCommeLue(notification.id!),
+              onDelete: () => controller.supprimerNotification(notification.id!),
+            );
+          },
+        );
+      }),
+    );
+  }
+}
+
+class NotificationCard extends StatelessWidget {
+  final models.Notification notification;
+  final VoidCallback onTap;
+  final VoidCallback onDelete;
+
+  const NotificationCard({
+    Key? key,
+    required this.notification,
+    required this.onTap,
+    required this.onDelete,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    _getIconForType(notification.type),
+                    color: notification.isRead ? Colors.grey : Colors.blue,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      notification.titre,
+                      style: TextStyle(
+                        fontWeight: notification.isRead
+                            ? FontWeight.normal
+                            : FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                  if (!notification.isRead)
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Colors.blue,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, color: Colors.red),
+                    onPressed: onDelete,
+                    tooltip: 'Supprimer',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                notification.message,
+                style: TextStyle(
+                  color: notification.isRead ? Colors.grey : Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                timeago.format(notification.createdAt, locale: 'fr'),
+                style: const TextStyle(
+                  color: Colors.grey,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
+  }
+
+  IconData _getIconForType(String type) {
+    switch (type.toLowerCase()) {
+      case 'transfert':
+        return Icons.swap_horiz;
+      case 'reorientation':
+        return Icons.change_circle;
+      case 'system':
+        return Icons.info;
+      default:
+        return Icons.notifications;
+    }
   }
 }

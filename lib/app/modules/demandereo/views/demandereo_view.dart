@@ -12,9 +12,6 @@ class DemandeReorientationScreen extends StatelessWidget {
   DemandeReorientationScreen({super.key});
 
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController motivationController = TextEditingController();
-  final TextEditingController newFiliereController = TextEditingController();
-
   final RxString selectedDocumentPath = ''.obs;
   final RxString selectedDocumentName = ''.obs;
 
@@ -73,20 +70,30 @@ class DemandeReorientationScreen extends StatelessWidget {
                 const SizedBox(height: 30),
                 const Divider(color: Colors.white),
                 _section("Informations Personnelles", Icons.person),
-                _buildReadonlyField("Nom", userController.getNom()),
-                _buildReadonlyField("Prénom", userController.getPrenom()),
-                _buildReadonlyField("Filière actuelle", userController.getFiliere()),
-                _buildReadonlyField("Niveau", userController.getNiveauLibelle()),
-                _buildReadonlyField("Faculté actuelle", userController.getFaculte()),
+                _styledField(demandeController.nomController, "Nom", enabled: false),
+                _styledField(demandeController.prenomController, "Prénom", enabled: false),
+                _styledField(demandeController.filiereActuelleController, "Filière actuelle", enabled: false),
+                _styledField(demandeController.niveauController, "Niveau", enabled: false),
+                _styledField(demandeController.faculteController, "Faculté actuelle", enabled: false),
                 const Divider(color: Colors.white),
                 _section("Réorientation Souhaitée", Icons.school),
-                _styledField(newFiliereController, "Nouvelle filière souhaitée"),
-                _styledField(motivationController, "Motivation", maxLines: 3),
+                _styledField(demandeController.nouvelleFiliereController, "Nouvelle filière souhaitée"),
+                _styledField(demandeController.motivationController, "Motivation", maxLines: 3),
                 const Divider(color: Colors.white),
                 _section("Pièce jointe", Icons.attach_file),
                 _buildDocumentPickerButton(context),
                 const SizedBox(height: 20),
-                _buildSubmitButton(),
+                Obx(() => demandeController.isLoading.value
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : _buildSubmitButton()),
+                if (demandeController.errorMessage.value.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Text(
+                      demandeController.errorMessage.value,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -95,40 +102,25 @@ class DemandeReorientationScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildReadonlyField(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: TextFormField(
-        initialValue: value,
-        readOnly: true,
-        style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
-        decoration: InputDecoration(
-          labelText: label,
-          filled: true,
-          fillColor: Colors.white.withOpacity(0.85),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      ),
-    );
-  }
-
-  Widget _styledField(TextEditingController controller, String label,
-      {int maxLines = 1}) {
+  Widget _styledField(TextEditingController controller, String label, {int maxLines = 1, bool enabled = true}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15.0),
       child: TextFormField(
         controller: controller,
         maxLines: maxLines,
-        style: const TextStyle(color: Colors.black),
+        enabled: enabled,
+        style: TextStyle(
+          color: enabled ? Colors.black : Colors.grey[600],
+        ),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: const TextStyle(color: Colors.black),
+          labelStyle: TextStyle(color: enabled ? Colors.black : Colors.grey[600]),
           filled: true,
-          fillColor: Colors.white.withOpacity(0.85),
+          fillColor: enabled ? Colors.white.withOpacity(0.85) : Colors.grey[200],
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         ),
         validator: (value) =>
-        value == null || value.isEmpty ? 'Ce champ est requis' : null,
+            value == null || value.isEmpty ? 'Ce champ est requis' : null,
       ),
     );
   }
@@ -140,7 +132,7 @@ class DemandeReorientationScreen extends StatelessWidget {
       label: Text(
         selectedDocumentName.value.isNotEmpty
             ? selectedDocumentName.value
-            : "Ajouter un document justificatif",
+            : "Ajouter un document justificatif (optionnel)",
         overflow: TextOverflow.ellipsis,
       ),
       style: ElevatedButton.styleFrom(
@@ -168,23 +160,17 @@ class DemandeReorientationScreen extends StatelessWidget {
     return ElevatedButton.icon(
       onPressed: () async {
         if (_formKey.currentState!.validate()) {
-          if (selectedDocumentPath.value.isEmpty) {
-            Get.snackbar("Erreur", "Veuillez ajouter un document justificatif.",
-                backgroundColor: Colors.redAccent.shade100,
-                snackPosition: SnackPosition.BOTTOM);
-            return;
+          File? file;
+          if (selectedDocumentPath.value.isNotEmpty) {
+            file = File(selectedDocumentPath.value);
           }
 
-          final file = File(selectedDocumentPath.value);
-
           await demandeController.soumettreDemandeReorientation(
-            nouvelleFiliere: newFiliereController.text,
-            motivation: motivationController.text,
+            nouvelleFiliere: demandeController.nouvelleFiliereController.text,
+            motivation: demandeController.motivationController.text,
             pieceJustificative: file,
           );
 
-          newFiliereController.clear();
-          motivationController.clear();
           selectedDocumentPath.value = '';
           selectedDocumentName.value = '';
         }

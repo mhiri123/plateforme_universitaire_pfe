@@ -1,16 +1,17 @@
 import 'package:get/get.dart';
-import '../controllers/traiterdemande_reo_controller.dart';
-import '../../../services/demande_reorientation_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../../services/demande_reorientation_service.dart';
+import '../controllers/mesdemandes_controller.dart';
 
-class TraiterdemandeReoBinding extends Bindings {
+class MesdemandesBinding extends Bindings {
   @override
   void dependencies() {
-    print('Initialisation du binding de traitement des demandes');
+    print('Initialisation du binding Mesdemandes...');
 
     // Initialiser le stockage sécurisé
-    Get.lazyPut<FlutterSecureStorage>(() => const FlutterSecureStorage());
+    final secureStorage = const FlutterSecureStorage();
+    Get.put<FlutterSecureStorage>(secureStorage, permanent: true);
 
     // Initialiser Dio avec l'URL de base
     final dio = Dio(BaseOptions(
@@ -29,22 +30,19 @@ class TraiterdemandeReoBinding extends Bindings {
       error: true,
     ));
 
-    // Injecter Dio
-    Get.lazyPut<Dio>(() => dio);
+    // Injecter Dio de manière permanente
+    Get.put<Dio>(dio, permanent: true);
 
-    // Injecter le service
-    Get.lazyPut<DemandeReorientationService>(
-      () => DemandeReorientationService(
-        dio: Get.find<Dio>(),
-        secureStorage: Get.find<FlutterSecureStorage>(),
-      ),
+    // Créer et injecter le service de manière permanente
+    final service = DemandeReorientationService(
+      dio: Get.find<Dio>(),
+      secureStorage: Get.find<FlutterSecureStorage>(),
     );
+    Get.put<DemandeReorientationService>(service, permanent: true);
 
     // Injecter le contrôleur
-    Get.lazyPut<TraiterdemandeReoController>(
-      () => TraiterdemandeReoController(),
-    );
+    Get.put<MesdemandesController>(MesdemandesController());
 
-    print('Binding de traitement des demandes initialisé avec succès');
+    print('Binding Mesdemandes initialisé avec succès');
   }
-}
+} 

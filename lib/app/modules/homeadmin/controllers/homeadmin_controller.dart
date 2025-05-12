@@ -2,6 +2,10 @@ import 'package:get/get.dart';
 import '../../../models/demande_reorientation_model.dart';
 import '../../../models/demande_transfert_enseignant_model.dart';
 import '../../../models/demande_transfert_etudiant_model.dart';
+import '../../../services/demande_reorientation_service.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/material.dart';
 
 class AdminHomeController extends GetxController {
   final RxList<DemandeReorientation> demandesReorientation = <DemandeReorientation>[].obs;
@@ -10,152 +14,124 @@ class AdminHomeController extends GetxController {
 
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
+  final RxInt nombreDemandesEnAttente = 0.obs;
+  final RxString nomFaculte = ''.obs;
+
+  late final DemandeReorientationService _service;
+  final _storage = GetStorage();
+  final _secureStorage = FlutterSecureStorage();
+
+  @override
+  void onInit() {
+    super.onInit();
+    _service = Get.find<DemandeReorientationService>();
+    _chargerDonnees();
+  }
+
+  Future<void> _chargerDonnees() async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+
+      // Récupérer le nom de la faculté de l'admin
+      final userRole = _storage.read('userRole');
+      final userEmail = _storage.read('userEmail');
+      
+      if (userRole != 'admin') {
+        throw Exception('Accès non autorisé');
+      }
+
+      // Charger les demandes de réorientation
+      await recupererDemandesReorientation();
+      
+      // Mettre à jour le compteur de demandes en attente
+      nombreDemandesEnAttente.value = demandesReorientation
+          .where((demande) => demande.statut == StatutDemande.enAttente)
+          .length;
+
+      // Charger les autres types de demandes si nécessaire
+      await recupererDemandesTransfertEtudiant();
+      await recupererDemandesTransfertEnseignant();
+
+    } catch (e) {
+      print('❌ Erreur lors du chargement des données: $e');
+      errorMessage.value = e.toString();
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   Future<void> recupererDemandesReorientation() async {
     try {
-      isLoading.value = true;
-
-      demandesReorientation.value = [
-        DemandeReorientation(
-          nom: 'Dupont',
-          prenom: 'Jean',
-          filiereActuelleNom: 'Science',  // Mise à jour du nom de la filière actuelle
-          nouvelleFiliereNom: 'Informatique', // Mise à jour du nom de la nouvelle filière
-          motivation: 'Changement de parcours',
-          statut: StatutDemande.enAttente,
-          commentaireAdmin: '',
-          level: 'Niveau 1',
-          facultyName: 'Faculté des Sciences',
-        ),
-      ];
+      final demandes = await _service.listerDemandesEnAttente();
+      demandesReorientation.value = demandes;
     } catch (e) {
+      print('❌ Erreur lors de la récupération des demandes de réorientation: $e');
       errorMessage.value = 'Erreur lors de la récupération des demandes de réorientation';
-      print(errorMessage.value);
-    } finally {
-      isLoading.value = false;
+      rethrow;
     }
   }
 
   Future<void> recupererDemandesTransfertEtudiant() async {
     try {
-      isLoading.value = true;
-      demandesTransfertEtudiant.value = [
-        // Ajouter des données de transfert étudiant si nécessaire
-      ];
+      // Implémenter la récupération des demandes de transfert étudiant
+      demandesTransfertEtudiant.value = [];
     } catch (e) {
+      print('❌ Erreur lors de la récupération des demandes de transfert étudiant: $e');
       errorMessage.value = 'Erreur lors de la récupération des demandes de transfert étudiant';
-      print(errorMessage.value);
-    } finally {
-      isLoading.value = false;
     }
   }
 
   Future<void> recupererDemandesTransfertEnseignant() async {
     try {
-      isLoading.value = true;
-      demandesTransfertEnseignant.value = [
-        DemandeTransfertEnseignant(
-          nom: 'Leroy',
-          prenom: 'Pierre',
-          email: 'pierre.leroy@example.com',
-          universiteActuelle: 'Université A',
-          faculteActuelle: 'Faculté des Sciences',
-          universiteDemandee: 'Université B',
-          motivation: 'Opportunité de recherche',
-          statut: DemandeTransfertEnseignant.STATUT_EN_ATTENTE,
-        ),
-      ];
+      // Implémenter la récupération des demandes de transfert enseignant
+      demandesTransfertEnseignant.value = [];
     } catch (e) {
+      print('❌ Erreur lors de la récupération des demandes de transfert enseignant: $e');
       errorMessage.value = 'Erreur lors de la récupération des demandes de transfert enseignant';
-      print(errorMessage.value);
+    }
+  }
+
+  Future<void> traiterDemandeReorientation(DemandeReorientation demande, bool accepter) async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+
+      await _service.traiterDemande(
+        demande: demande,
+        isAccepted: accepter,
+        commentaire: accepter ? "Votre demande a été acceptée." : "Votre demande a été rejetée.",
+      );
+
+      // Mettre à jour la liste des demandes
+      await recupererDemandesReorientation();
+      
+      // Mettre à jour le compteur
+      nombreDemandesEnAttente.value = demandesReorientation
+          .where((d) => d.statut == StatutDemande.enAttente)
+          .length;
+
+      Get.snackbar(
+        'Succès',
+        accepter ? 'Demande acceptée' : 'Demande rejetée',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      print('❌ Erreur lors du traitement de la demande: $e');
+      errorMessage.value = e.toString();
+      Get.snackbar(
+        'Erreur',
+        'Une erreur est survenue lors du traitement de la demande',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<void> traiterDemandeReorientation(DemandeReorientation demande, bool estAcceptee) async {
-    try {
-      isLoading.value = true;
-
-      final nouveauStatut = estAcceptee
-          ? StatutDemande.acceptee
-          : StatutDemande.rejetee;
-
-      final index = demandesReorientation.indexOf(demande);
-      if (index != -1) {
-        demandesReorientation[index] = demande.copyWith(statut: nouveauStatut);
-      }
-
-      print(estAcceptee
-          ? 'Demande de réorientation acceptée'
-          : 'Demande de réorientation refusée');
-    } catch (e) {
-      errorMessage.value = 'Erreur lors du traitement de la demande de réorientation';
-      print(errorMessage.value);
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> traiterDemandeTransfertEtudiant(DemandeTransfertEtudiant demande, bool estAcceptee) async {
-    try {
-      isLoading.value = true;
-
-      print(estAcceptee
-          ? 'Demande de transfert étudiant acceptée'
-          : 'Demande de transfert étudiant refusée');
-    } catch (e) {
-      errorMessage.value = 'Erreur lors du traitement de la demande de transfert étudiant';
-      print(errorMessage.value);
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> traiterDemandeTransfertEnseignant(DemandeTransfertEnseignant demande, bool estAcceptee) async {
-    try {
-      isLoading.value = true;
-
-      demande.statut = estAcceptee
-          ? DemandeTransfertEnseignant.STATUT_ACCEPTE
-          : DemandeTransfertEnseignant.STATUT_REFUSE;
-
-      demandesTransfertEnseignant.remove(demande);
-
-      print(estAcceptee
-          ? 'Demande de transfert enseignant acceptée'
-          : 'Demande de transfert enseignant refusée');
-    } catch (e) {
-      errorMessage.value = 'Erreur lors du traitement de la demande de transfert enseignant';
-      print(errorMessage.value);
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> ajouterCommentaire(dynamic demande, String commentaire) async {
-    try {
-      isLoading.value = true;
-
-      if (demande is DemandeReorientation) {
-        final index = demandesReorientation.indexOf(demande);
-        if (index != -1) {
-          demandesReorientation[index] =
-              demande.copyWith(commentaireAdmin: commentaire);
-        }
-      } else if (demande is DemandeTransfertEnseignant) {
-        final index = demandesTransfertEnseignant.indexOf(demande);
-        if (index != -1) {
-          demande.commentaireAdministration = commentaire;
-        }
-      }
-
-      print('Commentaire ajouté avec succès');
-    } catch (e) {
-      errorMessage.value = 'Erreur lors de l\'ajout du commentaire';
-      print(errorMessage.value);
-    } finally {
-      isLoading.value = false;
-    }
+  void actualiserDonnees() {
+    _chargerDonnees();
   }
 }

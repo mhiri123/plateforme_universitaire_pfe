@@ -8,6 +8,7 @@ import 'package:get_storage/get_storage.dart';
 import '../../../models/auth_response.dart';
 import '../../../services/api_service.dart';
 import '../../../services/demande_reorientation_service.dart';
+import '../../../services/notification_service.dart';
 
 import '../../chat/controllers/chat_controller.dart';
 import '../../demandereo/controllers/demande_reorientation_controller.dart';
@@ -51,12 +52,34 @@ class LoginController extends GetxController {
 
       print("Connecté en tant que : ${user.email}");
 
-      await _storage.write(key: 'auth_token', value: user.token ?? '');
+      final token = authResponse.token;
+      if (token != null && token.isNotEmpty) {
+        await _storage.write(key: 'auth_token', value: token);
+        print("Token stocké : $token");
+      } else {
+        print("⚠️ Token manquant dans la réponse");
+        throw Exception("Token d'authentification manquant");
+      }
 
       final box = GetStorage();
       await box.write('userId', user.id.toString());
       await box.write('userName', '${user.prenom} ${user.nom}');
       await box.write('userRole', user.role);
+      await box.write('userEmail', user.email);
+
+      print("Données utilisateur stockées :");
+      print("userId: ${user.id}");
+      print("userName: ${user.prenom} ${user.nom}");
+      print("userRole: ${user.role}");
+      print("userEmail: ${user.email}");
+
+      final userController = Get.put(UserController());
+      await userController.setUser(user.email, user.role, user.id);
+      
+      final NotificationService notificationService = Get.put(NotificationService(
+        secureStorage: Get.find<FlutterSecureStorage>(),
+      ));
+      Get.put(NotificationController(Get.find<NotificationService>()));
 
       _initializeControllers();
       _redirectBasedOnRole(user.role);
@@ -78,10 +101,8 @@ class LoginController extends GetxController {
   }
 
   void _initializeControllers() {
-    Get.put(UserController());
     Get.put(DemandeReorientationService(dio: Get.find<Dio>()));
     Get.put(ChatController());
-    Get.put(NotificationController());
     Get.put(DemandeTransfertEtudiantController());
     Get.put(DemandeTransfertEnseignantController());
     Get.put(DemandeReorientationController());
@@ -92,7 +113,7 @@ class LoginController extends GetxController {
       "super_admin": SuperAdminHomeScreen(),
       "admin": AdminHomeScreen(),
       "enseignant": TeacherHomeScreen(),
-      "etudiant": StudentHomeScreen(),
+      "etudiant": HomestudentView(),
     };
 
     final screen = roleScreens[role.toLowerCase()];

@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../controllers/homestudent_controller.dart';
 import '../../../routes/app_pages.dart';
 
 import '../../chat/views/chat_view.dart';
 import '../../notification/controllers/notification_controller.dart';
 import '../../chat/controllers/chat_controller.dart';
 
-class StudentHomeScreen extends StatelessWidget {
-  final NotificationController notificationController = NotificationController();
+class HomestudentView extends GetView<HomestudentController> {
+  const HomestudentView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // S'assure que le ChatController est bien instancié pour l'Obx
     final chatController = Get.put(ChatController());
 
     return Scaffold(
@@ -29,8 +29,9 @@ class StudentHomeScreen extends StatelessWidget {
                 const CircleAvatar(radius: 30, backgroundImage: AssetImage('assets/images/avatar.jpeg')),
                 const SizedBox(height: 30),
                 sideNavItem("Accueil", Icons.dashboard, Routes.HOMESTUDENT),
+                sideNavItem("Mes Demandes", Icons.assignment, Routes.MESDEMANDES),
                 sideNavItem("Chat", Icons.chat_bubble_outline, Routes.CHAT),
-                sideNavItem("Transfert", Icons.swap_horiz, Routes.DEMANDETRANSFERTETUDIANT),
+                sideNavItem("Transfert", Icons.swap_horiz, Routes.DEMANDETRANSFERT),
                 sideNavItem("Réorientation", Icons.compare_arrows, Routes.DEMANDEREO),
                 sideNavItem("Notifications", Icons.notifications, Routes.NOTIFICATION),
                 const Spacer(),
@@ -129,6 +130,7 @@ class StudentHomeScreen extends StatelessWidget {
                               child: HoverCard(
                                 title: "Transferts",
                                 color: Colors.pinkAccent,
+                                onTap: () => Get.toNamed(Routes.DEMANDETRANSFERT),
                               ),
                             ),
                             const SizedBox(width: 20),
@@ -136,8 +138,23 @@ class StudentHomeScreen extends StatelessWidget {
                               child: HoverCard(
                                 title: "Réorientations",
                                 color: Colors.blueAccent,
+                                onTap: () => Get.toNamed(Routes.DEMANDEREO),
                               ),
                             ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: HoverCard(
+                                title: "Mes Demandes",
+                                color: Colors.greenAccent,
+                                onTap: () => Get.toNamed(Routes.MESDEMANDES),
+                              ),
+                            ),
+                            const SizedBox(width: 20),
+                            Expanded(child: Container()), // Espace vide pour maintenir la mise en page
                           ],
                         ),
                       ],
@@ -208,8 +225,14 @@ class StudentHomeScreen extends StatelessWidget {
 class HoverCard extends StatefulWidget {
   final String title;
   final Color color;
+  final VoidCallback onTap;
 
-  const HoverCard({Key? key, required this.title, required this.color}) : super(key: key);
+  const HoverCard({
+    Key? key, 
+    required this.title, 
+    required this.color,
+    required this.onTap,
+  }) : super(key: key);
 
   @override
   _HoverCardState createState() => _HoverCardState();
@@ -253,13 +276,7 @@ class _HoverCardState extends State<HoverCard> {
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               child: ElevatedButton(
-                onPressed: () {
-                  if (widget.title == "Transferts") {
-                    Get.toNamed(Routes.DEMANDETRANSFERTETUDIANT);
-                  } else if (widget.title == "Réorientations") {
-                    Get.toNamed(Routes.DEMANDEREO);
-                  }
-                },
+                onPressed: widget.onTap,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isHovered ? widget.color.withOpacity(0.9) : widget.color,
                   elevation: 5,
@@ -267,9 +284,9 @@ class _HoverCardState extends State<HoverCard> {
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                   shadowColor: widget.color.withOpacity(0.4),
                 ),
-                child: const Text(
-                  "Soumettre une demande",
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                child: Text(
+                  widget.title == "Mes Demandes" ? "Voir mes demandes" : "Soumettre une demande",
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
               ),
             ),

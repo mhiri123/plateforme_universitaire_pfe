@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../routes/app_pages.dart';
 import '../../chat/controllers/chat_controller.dart';
-
+import '../controllers/hometeacher_controller.dart';
 import '../../chat/views/chat_view.dart';
 import '../../notification/controllers/notification_controller.dart';
+import '../../../services/notification_service.dart';
+import '../../../routes/app_pages.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class TeacherHomeScreen extends StatefulWidget {
+  const TeacherHomeScreen({Key? key}) : super(key: key);
+
   @override
-  _TeacherHomeScreenState createState() => _TeacherHomeScreenState();
+  State<TeacherHomeScreen> createState() => _TeacherHomeScreenState();
 }
 
 class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
   final ChatController chatController = Get.put(ChatController());
-  final NotificationController notificationController = Get.put(NotificationController());
+  final NotificationService notificationService = Get.put(NotificationService(
+    secureStorage: Get.find<FlutterSecureStorage>(),
+  ));
+  final NotificationController notificationController = Get.put(NotificationController(Get.find<NotificationService>()));
 
   final List<bool> _isHovered = [false, false];
 

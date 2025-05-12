@@ -11,6 +11,9 @@ import '../../notification/controllers/notification_controller.dart';
 import '../../demandereo/controllers/demande_reorientation_controller.dart';
 
 import '../controllers/homeadmin_controller.dart';
+import '../../../models/demande_reorientation_model.dart';
+import '../../../services/notification_service.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AdminHomeScreen extends StatelessWidget {
   final AdminHomeController adminHomeController = Get.put(AdminHomeController());
@@ -18,7 +21,10 @@ class AdminHomeScreen extends StatelessWidget {
   final DemandeTransfertEnseignantController demandeTransfertEnseignantController = Get.put(DemandeTransfertEnseignantController());
   final DemandeTransfertEtudiantController demandeTransfertEtudiantController = Get.put(DemandeTransfertEtudiantController());
   final ChatController chatController = Get.put(ChatController());
-  final NotificationController notificationController = Get.put(NotificationController());
+  final NotificationService notificationService = Get.put(NotificationService(
+    secureStorage: Get.find<FlutterSecureStorage>(),
+  ));
+  final NotificationController notificationController = Get.put(NotificationController(Get.find<NotificationService>()));
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +61,7 @@ class AdminHomeScreen extends StatelessWidget {
                   title: Text("Traiter demandes", style: TextStyle(color: Colors.white70, fontSize: 16)),
                   leading: Icon(Icons.assignment_turned_in, color: Colors.white70),
                   children: [
-                    _buildSubNavItem("Traiter demande réorientation", Routes.TRAITERDEMANDE_REO),
+                    _buildSubNavItem("Traiter demande réorientation", Routes.TRAITER_DEMANDE_REO),
                    // _buildSubNavItem("Traiter demande transfert étudiant", Routes.TRAITER_DEMANDE_TRANSFERT_ETUDIANT),
                    // _buildSubNavItem("Traiter demande transfert enseignant", Routes.TRAITER_DEMANDE_TRANSFERT_ENSEIGNANT),
                   ],

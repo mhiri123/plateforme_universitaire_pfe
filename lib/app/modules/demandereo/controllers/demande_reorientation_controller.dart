@@ -1,9 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../models/auth_response.dart';
 import '../../../models/demande_reorientation_model.dart';
 import '../../../services/demande_reorientation_service.dart';
 import '../../home/controllers/user_controller.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class DemandeReorientationController extends GetxController with StateMixin<List<DemandeReorientation>> {
   late final DemandeReorientationService _service;
@@ -13,17 +16,182 @@ class DemandeReorientationController extends GetxController with StateMixin<List
   final RxList<DemandeReorientation> mesDemandesReorientation = <DemandeReorientation>[].obs;
   final RxList<DemandeReorientation> demandesEnAttente = <DemandeReorientation>[].obs;
   late final UserController userController;
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+
+  // Controllers for editable fields
+  late TextEditingController nomController;
+  late TextEditingController prenomController;
+  late TextEditingController filiereActuelleController;
+  late TextEditingController niveauController;
+  late TextEditingController faculteController;
+  late TextEditingController nouvelleFiliereController;
+  late TextEditingController motivationController;
 
   @override
   void onInit() {
     super.onInit();
-    _service = Get.find<DemandeReorientationService>();
-    userController = Get.find<UserController>();
-    _chargerDonnees();
+    print('\n=== DÉBUT INITIALISATION DemandeReorientationController ===');
+    try {
+      _service = Get.find<DemandeReorientationService>();
+      print('✓ Service trouvé avec succès');
+      
+      // Initialiser le UserController
+      userController = Get.put(UserController());
+      print('✓ UserController initialisé avec succès');
+      
+      // Vérifier le token d'authentification
+      _checkAuthToken();
+      
+      // Initialiser les contrôleurs avec des valeurs vides
+      _initializeEmptyControllers();
+      print('✓ Contrôleurs initialisés avec des valeurs vides');
+      
+      // Vérifier le stockage local
+      _checkLocalStorage();
+      
+      _loadUserData();
+      _chargerDonnees();
+      print('\n=== FIN INITIALISATION DemandeReorientationController ===\n');
+    } catch (e) {
+      print('❌ ERREUR dans onInit: $e');
+      print('Stack trace: ${StackTrace.current}');
+      // Afficher une notification d'erreur à l'utilisateur
+      _showErrorNotification('Erreur lors de l\'initialisation: $e');
+    }
   }
 
-  void _chargerDonnees() {
-    Future.wait([
+  Future<void> _checkAuthToken() async {
+    try {
+      final token = await _secureStorage.read(key: 'auth_token');
+      print("Token récupéré : $token");
+      
+      if (token == null || token.isEmpty) {
+        print('❌ Token d\'authentification manquant');
+        Get.offAllNamed('/login');
+        return;
+      }
+      print('✓ Token d\'authentification trouvé');
+    } catch (e) {
+      print('❌ Erreur lors de la vérification du token : $e');
+      Get.offAllNamed('/login');
+    }
+  }
+
+  void _checkLocalStorage() {
+    final box = GetStorage();
+    print('\n=== DONNÉES DANS LE STOCKAGE ===');
+    print('userId: ${box.read('userId')?.toString()}');
+    print('userName: ${box.read('userName')?.toString()}');
+    print('userRole: ${box.read('userRole')?.toString()}');
+    print('userEmail: ${box.read('userEmail')?.toString()}');
+  }
+
+  void _initializeEmptyControllers() {
+    print('Initialisation des contrôleurs avec des valeurs vides');
+    nomController = TextEditingController();
+    prenomController = TextEditingController();
+    filiereActuelleController = TextEditingController();
+    niveauController = TextEditingController();
+    faculteController = TextEditingController();
+    nouvelleFiliereController = TextEditingController();
+    motivationController = TextEditingController();
+  }
+
+  void _loadUserData() {
+    print('\n=== CHARGEMENT DES DONNÉES UTILISATEUR ===');
+    try {
+      print('État du UserController:');
+      print('Email: ${userController.userEmail.value}');
+      print('Rôle: ${userController.userRole.value}');
+      
+      if (userController.utilisateurConnecte.value != null) {
+        print('✓ Données utilisateur disponibles dans le UserController');
+        _updateControllersWithUserData();
+      } else {
+        print('⚠ Données utilisateur non disponibles, tentative de chargement...');
+        final box = GetStorage();
+        final userId = box.read('userId')?.toString();
+        final userRole = box.read('userRole')?.toString();
+        final userEmail = box.read('userEmail')?.toString();
+        
+        if (userId != null && userRole != null && userEmail != null && userEmail.isNotEmpty) {
+          print('\nTentative de chargement des données utilisateur...');
+          userController.setUser(
+            userEmail,
+            userRole,
+            int.tryParse(userId) ?? 0
+          ).then((_) {
+            print('\n✓ Données utilisateur chargées avec succès');
+            _updateControllersWithUserData();
+          }).catchError((error) {
+            print('❌ Erreur lors du chargement: $error');
+            Get.offAllNamed('/login');
+          });
+        } else {
+          print('❌ Données utilisateur incomplètes dans le stockage');
+          Get.offAllNamed('/login');
+        }
+      }
+    } catch (e) {
+      print('❌ Erreur lors du chargement: $e');
+      Get.offAllNamed('/login');
+    }
+  }
+
+  void _updateControllersWithUserData() {
+    print('\n=== MISE À JOUR DES CONTRÔLEURS ===');
+    try {
+      if (userController.utilisateurConnecte.value == null) {
+        print('❌ Utilisateur non connecté');
+        return;
+      }
+
+      // Récupération des données de l'utilisateur
+      final user = userController.utilisateurConnecte.value!;
+      
+      // Mise à jour des contrôleurs avec les données de l'utilisateur
+      nomController.text = user.nom ?? '';
+      prenomController.text = user.prenom ?? '';
+      filiereActuelleController.text = user.filiere ?? '';
+      niveauController.text = user.niveau?.toString() ?? '';
+      faculteController.text = userController.getFaculte() ?? '';
+
+      print('\nVérification des valeurs:');
+      print('Nom: ${nomController.text}');
+      print('Prénom: ${prenomController.text}');
+      print('Filière: ${filiereActuelleController.text}');
+      print('Niveau: ${niveauController.text}');
+      print('Faculté: ${faculteController.text}');
+      
+      update();
+      print('\n✓ Interface mise à jour avec succès');
+    } catch (e) {
+      print('❌ Erreur lors de la mise à jour: $e');
+      print('Stack trace: ${StackTrace.current}');
+    }
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    print('DemandeReorientationController - onReady démarré');
+    _loadUserData();
+  }
+
+  @override
+  void onClose() {
+    nomController.dispose();
+    prenomController.dispose();
+    filiereActuelleController.dispose();
+    niveauController.dispose();
+    faculteController.dispose();
+    nouvelleFiliereController.dispose();
+    motivationController.dispose();
+    super.onClose();
+  }
+
+  Future<void> _chargerDonnees() async {
+    await Future.wait([
       chargerDemandesEnAttente(),
       chargerMesDemandesReorientation(),
     ]);
@@ -32,38 +200,46 @@ class DemandeReorientationController extends GetxController with StateMixin<List
   Future<void> soumettreDemandeReorientation({
     required String nouvelleFiliere,
     required String motivation,
-    required File pieceJustificative,
+    File? pieceJustificative,
   }) async {
-    final nom = userController.getNom();
-    final prenom = userController.getPrenom();
-    final filiereActuelle = userController.getFiliere();
-    final niveau = userController.getNiveauLibelle();
-    final faculte = userController.getFaculte();
-
-    // Conversion des ID des filières en int si nécessaire
-    final int filiereActuelleId = int.tryParse(filiereActuelle) ?? 0;
-    final int nouvelleFiliereId = int.tryParse(nouvelleFiliere) ?? 0;
-
-    final validationResult = _validateDonnees(
-      nom: nom,
-      prenom: prenom,
-      filiereActuelle: filiereActuelle,
-      choixNouvelleFiliere: nouvelleFiliere,
-      motivation: motivation,
-      level: niveau,
-      facultyName: faculte,
-      pieceJustificative: pieceJustificative,
-    );
-
-    if (!validationResult.isValid) {
-      _showErrorNotification(validationResult.errors.join('\n'));
-      return;
-    }
-
+    print('Début de soumettreDemandeReorientation');
     try {
+      final nom = nomController.text;
+      final prenom = prenomController.text;
+      final filiereActuelle = filiereActuelleController.text;
+      final niveau = niveauController.text;
+      final faculte = faculteController.text;
+
+      print('Données du formulaire:');
+      print('Nom: $nom');
+      print('Prénom: $prenom');
+      print('Filière actuelle: $filiereActuelle');
+      print('Nouvelle filière: $nouvelleFiliere');
+      print('Niveau: $niveau');
+      print('Faculté: $faculte');
+      print('Motivation: $motivation');
+
+      final validationResult = _validateDonnees(
+        nom: nom,
+        prenom: prenom,
+        filiereActuelle: filiereActuelle,
+        choixNouvelleFiliere: nouvelleFiliere,
+        motivation: motivation,
+        level: niveau,
+        facultyName: faculte,
+        pieceJustificative: pieceJustificative,
+      );
+
+      if (!validationResult.isValid) {
+        print('Erreurs de validation: ${validationResult.errors.join(', ')}');
+        _showErrorNotification(validationResult.errors.join('\n'));
+        return;
+      }
+
       isLoading.value = true;
       errorMessage.value = '';
 
+      print('Envoi de la demande au service...');
       final result = await _service.soumettreDemande(
         nom: nom,
         prenom: prenom,
@@ -75,16 +251,41 @@ class DemandeReorientationController extends GetxController with StateMixin<List
         pieceJustificative: pieceJustificative,
       );
 
+      print('Demande soumise avec succès: ${result.id}');
       demandeCourante.value = result;
       mesDemandesReorientation.add(result);
       demandesEnAttente.add(result);
 
       _showSuccessNotification("Demande soumise avec succès");
-    } catch (e) {
+      _resetForm();
+      
+      // Actualiser la liste des demandes
+      await chargerMesDemandesReorientation();
+    } catch (e, stackTrace) {
+      print('Erreur lors de la soumission: $e');
+      print('Stack trace: $stackTrace');
       errorMessage.value = e.toString();
       _showErrorNotification(errorMessage.value);
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  void _resetForm() {
+    print('Début de la réinitialisation du formulaire');
+    try {
+      nomController.text = userController.getNom();
+      prenomController.text = userController.getPrenom();
+      filiereActuelleController.text = userController.getFiliere();
+      niveauController.text = userController.getNiveauLibelle();
+      faculteController.text = userController.getFaculte();
+      nouvelleFiliereController.clear();
+      motivationController.clear();
+      update();
+      print('Formulaire réinitialisé avec succès');
+    } catch (e) {
+      print('Erreur lors de la réinitialisation du formulaire: $e');
+      print('Stack trace: ${StackTrace.current}');
     }
   }
 
@@ -108,9 +309,16 @@ class DemandeReorientationController extends GetxController with StateMixin<List
       isLoading.value = true;
       errorMessage.value = '';
 
-      final demandes = await _service.listerMesDemandesReorientation();
+      // Récupérer l'ID de l'utilisateur connecté
+      final userId = await _getIdEtudiantConnecte();
+      if (userId == null) {
+        throw Exception('ID utilisateur non trouvé');
+      }
+
+      final demandes = await _service.listerMesDemandesReorientation(userId);
       mesDemandesReorientation.value = demandes;
     } catch (e) {
+      print('❌ Erreur lors du chargement des demandes: $e');
       errorMessage.value = e.toString();
       _showErrorNotification(errorMessage.value);
     } finally {
@@ -118,36 +326,57 @@ class DemandeReorientationController extends GetxController with StateMixin<List
     }
   }
 
-  Future<void> traiterDemandeReorientation({
-    required DemandeReorientation demande,
-    required bool accepter,
-  }) async {
+  Future<int?> _getIdEtudiantConnecte() async {
     try {
-      isLoading.value = true;
-      errorMessage.value = '';
-
-      await _service.traiterDemande(
-        demande: demande,
-        isAccepted: true,
-        commentaire: "Votre demande a été acceptée.",
-      );
-      final demandeModifiee = demande.copyWith(
-        statut: accepter ? StatutDemande.acceptee : StatutDemande.rejetee,
-      );
-
-      // Mise à jour des listes
-      demandesEnAttente.removeWhere((d) => d.id == demande.id);
-      mesDemandesReorientation.add(demandeModifiee);
-
-      _showSuccessNotification(accepter ? 'Demande acceptée' : 'Demande rejetée');
+      final box = GetStorage();
+      final userId = box.read('userId');
+      if (userId == null) {
+        print('⚠️ ID utilisateur non trouvé dans le stockage');
+        return null;
+      }
+      return int.tryParse(userId.toString());
     } catch (e) {
-      errorMessage.value = e.toString();
-      _showErrorNotification(errorMessage.value);
-    } finally {
-      isLoading.value = false;
+      print('❌ Erreur lors de la récupération de l\'ID utilisateur: $e');
+      return null;
     }
   }
 
+  Future<void> traiterDemandeReorientation(int demandeId, bool accepter) async {
+    try {
+      final result = await _service.traiterDemande(
+        demande: DemandeReorientation(
+          id: demandeId,
+          nom: '',
+          prenom: '',
+          filiereActuelleNom: '',
+          nouvelleFiliereNom: '',
+          motivation: '',
+          level: '',
+          facultyName: '',
+          statut: accepter ? StatutDemande.acceptee : StatutDemande.rejetee,
+        ),
+        isAccepted: accepter,
+        commentaire: accepter ? "Votre demande a été acceptée." : "Votre demande a été rejetée.",
+      );
+
+      if (result != null) {
+        Get.snackbar(
+          'Succès',
+          accepter ? 'Demande acceptée' : 'Demande rejetée',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+        await _chargerDonnees();
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Erreur',
+        'Impossible de traiter la demande',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+  }
 
   ValidationResult _validateDonnees({
     required String nom,
@@ -166,10 +395,21 @@ class DemandeReorientationController extends GetxController with StateMixin<List
     if (filiereActuelle.trim().isEmpty) errors.add('La filière actuelle est requise');
     if (choixNouvelleFiliere.trim().isEmpty) errors.add('La nouvelle filière est requise');
     if (motivation.trim().length < 10) errors.add('La motivation doit contenir au moins 10 caractères');
-    if (filiereActuelle.trim() == choixNouvelleFiliere.trim()) errors.add('La nouvelle filière doit être différente');
-    if (pieceJustificative == null) errors.add('Une pièce justificative est requise');
+    if (filiereActuelle.trim() == choixNouvelleFiliere.trim()) errors.add('La nouvelle filière doit être différente de la filière actuelle');
     if (level.trim().isEmpty) errors.add('Le niveau est requis');
     if (facultyName.trim().isEmpty) errors.add('La faculté est requise');
+    
+    // Validation du fichier si présent
+    if (pieceJustificative != null) {
+      final fileSize = pieceJustificative.lengthSync();
+      if (fileSize > 5 * 1024 * 1024) { // 5MB max
+        errors.add('Le fichier ne doit pas dépasser 5MB');
+      }
+      final extension = pieceJustificative.path.split('.').last.toLowerCase();
+      if (!['pdf', 'doc', 'docx'].contains(extension)) {
+        errors.add('Le fichier doit être au format PDF ou Word');
+      }
+    }
 
     return ValidationResult(isValid: errors.isEmpty, errors: errors);
   }

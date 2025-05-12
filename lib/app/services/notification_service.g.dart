@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'demande_reorientation_service.dart';
+part of 'notification_service.dart';
 
 // **************************************************************************
 // RetrofitGenerator
@@ -8,9 +8,8 @@ part of 'demande_reorientation_service.dart';
 
 // ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element
 
-class _DemandeReorientationApiService
-    implements DemandeReorientationApiService {
-  _DemandeReorientationApiService(
+class _NotificationApiService implements NotificationApiService {
+  _NotificationApiService(
     this._dio, {
     this.baseUrl,
     this.errorLogger,
@@ -25,20 +24,19 @@ class _DemandeReorientationApiService
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<DemandeReorientation> soumettreDemande(FormData formData) async {
+  Future<Map<String, dynamic>> listerNotifications() async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = formData;
-    final _options = _setStreamType<DemandeReorientation>(Options(
-      method: 'POST',
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<Map<String, dynamic>>(Options(
+      method: 'GET',
       headers: _headers,
       extra: _extra,
-      contentType: 'multipart/form-data',
     )
         .compose(
           _dio.options,
-          '/reorientation/demandes',
+          '/notifications',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -48,9 +46,10 @@ class _DemandeReorientationApiService
           baseUrl,
         )));
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late DemandeReorientation _value;
+    late Map<String, dynamic> _value;
     try {
-      _value = DemandeReorientation.fromJson(_result.data!);
+      _value = _result.data!.map((k, dynamic v) =>
+          MapEntry(k, dynamic.fromJson(v as Map<String, dynamic>)));
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
       rethrow;
@@ -59,19 +58,19 @@ class _DemandeReorientationApiService
   }
 
   @override
-  Future<List<DemandeReorientation>> listerDemandesEnAttente() async {
+  Future<Map<String, dynamic>> listerNotificationsNonLues() async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<List<DemandeReorientation>>(Options(
+    final _options = _setStreamType<Map<String, dynamic>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
     )
         .compose(
           _dio.options,
-          '/reorientation/demandes/en-attente',
+          '/notifications/unread',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -80,13 +79,11 @@ class _DemandeReorientationApiService
           _dio.options.baseUrl,
           baseUrl,
         )));
-    final _result = await _dio.fetch<List<dynamic>>(_options);
-    late List<DemandeReorientation> _value;
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late Map<String, dynamic> _value;
     try {
-      _value = _result.data!
-          .map((dynamic i) =>
-              DemandeReorientation.fromJson(i as Map<String, dynamic>))
-          .toList();
+      _value = _result.data!.map((k, dynamic v) =>
+          MapEntry(k, dynamic.fromJson(v as Map<String, dynamic>)));
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
       rethrow;
@@ -95,60 +92,19 @@ class _DemandeReorientationApiService
   }
 
   @override
-  Future<List<DemandeReorientation>> listerMesDemandesReorientation(
-      int id) async {
+  Future<Map<String, dynamic>> marquerCommeLue(int id) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<List<DemandeReorientation>>(Options(
-      method: 'GET',
-      headers: _headers,
-      extra: _extra,
-    )
-        .compose(
-          _dio.options,
-          '/reorientation/demandes/etudiant/${id}',
-          queryParameters: queryParameters,
-          data: _data,
-        )
-        .copyWith(
-            baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        )));
-    final _result = await _dio.fetch<List<dynamic>>(_options);
-    late List<DemandeReorientation> _value;
-    try {
-      _value = _result.data!
-          .map((dynamic i) =>
-              DemandeReorientation.fromJson(i as Map<String, dynamic>))
-          .toList();
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
-  Future<DemandeReorientation> traiterDemande(
-    int id,
-    Map<String, dynamic> donneesTraitement,
-  ) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    _data.addAll(donneesTraitement);
-    final _options = _setStreamType<DemandeReorientation>(Options(
+    final _options = _setStreamType<Map<String, dynamic>>(Options(
       method: 'PUT',
       headers: _headers,
       extra: _extra,
     )
         .compose(
           _dio.options,
-          '/reorientation/demandes/${id}/traiter',
+          '/notifications/${id}/read',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -158,9 +114,114 @@ class _DemandeReorientationApiService
           baseUrl,
         )));
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late DemandeReorientation _value;
+    late Map<String, dynamic> _value;
     try {
-      _value = DemandeReorientation.fromJson(_result.data!);
+      _value = _result.data!.map((k, dynamic v) =>
+          MapEntry(k, dynamic.fromJson(v as Map<String, dynamic>)));
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Map<String, dynamic>> marquerToutCommeLues() async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<Map<String, dynamic>>(Options(
+      method: 'PUT',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          '/notifications/read-all',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(
+            baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        )));
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late Map<String, dynamic> _value;
+    try {
+      _value = _result.data!.map((k, dynamic v) =>
+          MapEntry(k, dynamic.fromJson(v as Map<String, dynamic>)));
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Map<String, dynamic>> supprimerNotification(int id) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<Map<String, dynamic>>(Options(
+      method: 'DELETE',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          '/notifications/${id}',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(
+            baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        )));
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late Map<String, dynamic> _value;
+    try {
+      _value = _result.data!.map((k, dynamic v) =>
+          MapEntry(k, dynamic.fromJson(v as Map<String, dynamic>)));
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Map<String, dynamic>> creerNotification(
+      Map<String, dynamic> notification) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(notification);
+    final _options = _setStreamType<Map<String, dynamic>>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          '/notifications',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(
+            baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        )));
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late Map<String, dynamic> _value;
+    try {
+      _value = _result.data!.map((k, dynamic v) =>
+          MapEntry(k, dynamic.fromJson(v as Map<String, dynamic>)));
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
       rethrow;

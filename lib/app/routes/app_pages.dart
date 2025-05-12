@@ -23,7 +23,7 @@ import '../modules/faculty_management/views/faculty_management_view.dart';
 import '../modules/forgotpassword/bindings/forgotpassword_binding.dart';
 import '../modules/forgotpassword/views/forgotpassword_view.dart';
 import '../modules/home/bindings/home_binding.dart';
-import '../modules/home/views/home_screen.dart';
+import '../modules/home/views/home_view.dart';
 import '../modules/homeadmin/bindings/homeadmin_binding.dart';
 import '../modules/homeadmin/views/homeadmin_view.dart';
 import '../modules/homestudent/bindings/homestudent_binding.dart';
@@ -34,6 +34,8 @@ import '../modules/hometeacher/bindings/hometeacher_binding.dart';
 import '../modules/hometeacher/views/hometeacher_view.dart';
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
+import '../modules/mesdemandes/bindings/mesdemandes_binding.dart';
+import '../modules/mesdemandes/views/mesdemandes_view.dart';
 import '../modules/news/bindings/news_binding.dart';
 import '../modules/news/views/news_view.dart';
 import '../modules/notification/bindings/notification_binding.dart';
@@ -62,13 +64,23 @@ part 'app_routes.dart';
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.HOME;
+  static const INITIAL = Routes.LOGIN;
 
   static final routes = [
     GetPage(
       name: _Paths.HOME,
-      page: () => HomeScreen(),
+      page: () => const HomeView(),
       binding: HomeBinding(),
+    ),
+    GetPage(
+      name: _Paths.LOGIN,
+      page: () => LoginScreen(),
+      binding: LoginBinding(),
+    ),
+    GetPage(
+      name: _Paths.SIGNUP,
+      page: () => SignUpScreen (),
+      binding: SignupBinding(),
     ),
     GetPage(
       name: _Paths.FORGOTPASSWORD,
@@ -76,23 +88,18 @@ class AppPages {
       binding: ForgotpasswordBinding(),
     ),
     GetPage(
-      name: _Paths.SIGNUP,
-      page: () => SignUpScreen(),
-      binding: SignupBinding(),
-    ),
-    GetPage(
       name: _Paths.HOMETEACHER,
-      page: () => TeacherHomeScreen(),
+      page: () => TeacherHomeScreen (),
       binding: HometeacherBinding(),
     ),
     GetPage(
       name: _Paths.HOMEADMIN,
-      page: () => AdminHomeScreen(),
+      page: () => AdminHomeScreen (),
       binding: AdminHomeBinding(),
     ),
     GetPage(
       name: _Paths.HOMESTUDENT,
-      page: () => StudentHomeScreen(),
+      page: () => const HomestudentView(),
       binding: HomestudentBinding(),
     ),
     GetPage(
@@ -101,18 +108,13 @@ class AppPages {
       binding: DemandereoBinding(),
     ),
     GetPage(
-      name: _Paths.LOGIN,
-      page: () => LoginScreen(),
-      binding: LoginBinding(),
-    ),
-    GetPage(
       name: _Paths.CHAT,
       page: () => ChatScreen(),
       binding: ChatBinding(),
     ),
     GetPage(
       name: _Paths.NOTIFICATION,
-      page: () => NotificationScreen(),
+      page: () => const NotificationView(),
       binding: NotificationBinding(),
     ),
     GetPage(
@@ -135,15 +137,14 @@ class AppPages {
       page: () => DemandeTransfertEtudiantScreen(),
       binding: DemandetransfertBinding(),
     ),
-
     GetPage(
       name: _Paths.DASHBOARD,
-      page: () => DashboardScreen(),
+      page: () => DashboardScreen (),
       binding: DashboardBinding(),
     ),
     GetPage(
       name: _Paths.FACULTY_MANAGEMENT,
-      page: () => FacultyManagementScreen(),
+      page: () => FacultyManagementScreen (),
       binding: FacultyManagementBinding(),
     ),
     GetPage(
@@ -153,7 +154,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.USER_MANAGEMENT,
-      page: () => UserManagementScreen(),
+      page: () => UserManagementScreen (),
       binding: UserManagementBinding(),
     ),
     GetPage(
@@ -163,12 +164,12 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.PERMISSION_MANAGEMENT,
-      page: () => PermissionManagementScreen(),
+      page: () => PermissionManagementScreen (),
       binding: PermissionManagementBinding(),
     ),
     GetPage(
       name: _Paths.FACULTY_DETAILS,
-      page: () => FacultyDetailsScreen(facultyId: 1),
+      page: () => FacultyDetailsScreen(facultyId: 0,),
       binding: FacultyDetailsBinding(),
     ),
     GetPage(
@@ -194,12 +195,17 @@ class AppPages {
     GetPage(
       name: _Paths.DEMANDETRANSFETENSEIGNANT,
       page: () => DemandeTransfertEnseignantScreen(),
-      binding: DemandetransfetenseignantBinding(),
+      binding: DemandetransfertBinding(),
     ),
     GetPage(
-      name: _Paths.TRAITERDEMANDE_REO,
-      page: () => AdminTraitementDemandeReoScreen(),
+      name: _Paths.TRAITER_DEMANDE_REO,
+      page: () => AdminTraitementDemandeReoScreen (),
       binding: TraiterdemandeReoBinding(),
+    ),
+    GetPage(
+      name: _Paths.MESDEMANDES,
+      page: () => const MesdemandesView(),
+      binding: MesdemandesBinding(),
     ),
   ];
 }
