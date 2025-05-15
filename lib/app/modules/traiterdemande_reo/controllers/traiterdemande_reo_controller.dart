@@ -6,8 +6,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
 
 class TraiterdemandeReoController extends GetxController {
-  final DemandeReorientationService _service = Get.find<DemandeReorientationService>();
-  final RxList<DemandeReorientation> demandesEnAttente = <DemandeReorientation>[].obs;
+  final DemandeReorientationService _service =
+      Get.find<DemandeReorientationService>();
+  final RxList<DemandeReorientation> demandesEnAttente =
+      <DemandeReorientation>[].obs;
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
   final _secureStorage = FlutterSecureStorage();
@@ -23,10 +25,10 @@ class TraiterdemandeReoController extends GetxController {
       print('Chargement des demandes en attente...');
       isLoading.value = true;
       errorMessage.value = '';
-      
+
       final demandes = await _service.listerDemandesEnAttente();
       print('${demandes.length} demandes en attente récupérées');
-      
+
       demandesEnAttente.value = demandes;
     } catch (e) {
       print('❌ Erreur lors du chargement des demandes: $e');
@@ -42,7 +44,8 @@ class TraiterdemandeReoController extends GetxController {
     }
   }
 
-  Future<void> traiterDemande(DemandeReorientation demande, bool accepter) async {
+  Future<void> traiterDemande(
+      DemandeReorientation demande, bool accepter) async {
     try {
       print('\n=== DÉBUT TRAITEMENT DEMANDE ===');
       print('ID de la demande: ${demande.id}');
@@ -51,7 +54,7 @@ class TraiterdemandeReoController extends GetxController {
       print('- Nom: ${demande.nom}');
       print('- Prénom: ${demande.prenom}');
       print('- Statut actuel: ${demande.statut}');
-      
+
       if (demande.id == null) {
         throw Exception('ID de la demande manquant');
       }
@@ -60,15 +63,12 @@ class TraiterdemandeReoController extends GetxController {
       errorMessage.value = '';
 
       final result = await _service.traiterDemande(
-        demande: demande,
-        isAccepted: accepter,
-        commentaire: accepter ? "Votre demande a été acceptée." : "Votre demande a été rejetée.",
-      );
+          demande.id.toString(),
+          accepter,
+          accepter
+              ? "Votre demande a été acceptée."
+              : "Votre demande a été rejetée.");
 
-      print('\nRésultat du traitement:');
-      print('- Nouveau statut: ${result.statut}');
-      print('- Commentaire: ${result.commentaireAdmin}');
-      
       // Mettre à jour la liste des demandes
       final index = demandesEnAttente.indexWhere((d) => d.id == demande.id);
       if (index != -1) {
@@ -77,7 +77,7 @@ class TraiterdemandeReoController extends GetxController {
       } else {
         print('⚠️ Demande non trouvée dans la liste');
       }
-      
+
       Get.snackbar(
         'Succès',
         accepter ? 'Demande acceptée' : 'Demande rejetée',
@@ -85,10 +85,10 @@ class TraiterdemandeReoController extends GetxController {
         colorText: Colors.white,
         duration: const Duration(seconds: 3),
       );
-      
+
       // Recharger les demandes en attente
       await chargerDemandesEnAttente();
-      
+
       print('=== FIN TRAITEMENT DEMANDE ===\n');
     } on DioException catch (e) {
       print('\n❌ ERREUR DIO DÉTAILLÉE:');
@@ -98,12 +98,12 @@ class TraiterdemandeReoController extends GetxController {
       print('Méthode: ${e.requestOptions.method}');
       print('Headers: ${e.requestOptions.headers}');
       print('Data: ${e.requestOptions.data}');
-      
+
       if (e.response != null) {
         print('\nRéponse du serveur:');
         print('Status code: ${e.response?.statusCode}');
         print('Response data: ${e.response?.data}');
-        
+
         String messageErreur = 'Impossible de traiter la demande';
         if (e.response?.data != null) {
           if (e.response?.data['errors'] != null) {
@@ -117,7 +117,7 @@ class TraiterdemandeReoController extends GetxController {
             messageErreur = e.response?.data['message'];
           }
         }
-        
+
         errorMessage.value = messageErreur;
         Get.snackbar(
           'Erreur',
@@ -131,7 +131,7 @@ class TraiterdemandeReoController extends GetxController {
       print('\n❌ ERREUR INATTENDUE:');
       print('Message: $e');
       print('Stack trace: $stackTrace');
-      
+
       errorMessage.value = e.toString();
       Get.snackbar(
         'Erreur',

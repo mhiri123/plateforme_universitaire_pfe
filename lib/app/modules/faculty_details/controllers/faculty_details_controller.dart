@@ -17,7 +17,7 @@ class FacultyController extends GetxController {
       isLoading(true);
 
       final dio = Dio();
-      final response = await dio.get("http://192.168.1.17:8000/api/faculties");
+      final response = await dio.get("http://172.23.0.1:8000/api/faculties");
 
       if (response.statusCode == 200 && response.data != null) {
         // 💡 Vérifie que response.data est bien une List

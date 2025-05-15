@@ -18,7 +18,8 @@ class TraiterdemandeReoBinding extends Bindings {
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
       sendTimeout: const Duration(seconds: 30),
-      validateStatus: (status) => status != null && status >= 200 && status < 300,
+      validateStatus: (status) =>
+          status != null && status >= 200 && status < 300,
     ));
 
     // Ajouter les intercepteurs pour le logging
@@ -34,10 +35,7 @@ class TraiterdemandeReoBinding extends Bindings {
 
     // Injecter le service
     Get.lazyPut<DemandeReorientationService>(
-      () => DemandeReorientationService(
-        dio: Get.find<Dio>(),
-        secureStorage: Get.find<FlutterSecureStorage>(),
-      ),
+      () => DemandeReorientationService(Get.find<Dio>()),
     );
 
     // Injecter le contrôleur

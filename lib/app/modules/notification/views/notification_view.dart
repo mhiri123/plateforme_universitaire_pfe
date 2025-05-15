@@ -22,7 +22,7 @@ class NotificationView extends GetView<NotificationController> {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Actualiser',
-            onPressed: () => controller.chargerNotifications(),
+            onPressed: () => controller.rafraichirNotifications(),
           ),
         ],
       ),
@@ -31,7 +31,42 @@ class NotificationView extends GetView<NotificationController> {
           return const Center(child: CircularProgressIndicator());
         }
 
+        if (controller.hasServerError.value) {
+          // Affichage spécifique pour les erreurs serveur
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.cloud_off, size: 64, color: Colors.grey),
+                const SizedBox(height: 16),
+                Text(
+                  controller.error.value,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Réessayer maintenant'),
+                  onPressed: () => controller.rafraichirNotifications(),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Les notifications s\'actualiseront automatiquement dès que le service sera disponible.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
         if (controller.error.isNotEmpty) {
+          // Autres types d'erreurs
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -72,16 +107,20 @@ class NotificationView extends GetView<NotificationController> {
           );
         }
 
-        return ListView.builder(
-          itemCount: controller.notifications.length,
-          itemBuilder: (context, index) {
-            final notification = controller.notifications[index];
-            return NotificationCard(
-              notification: notification,
-              onTap: () => controller.marquerCommeLue(notification.id!),
-              onDelete: () => controller.supprimerNotification(notification.id!),
-            );
-          },
+        return RefreshIndicator(
+          onRefresh: () => controller.chargerNotifications(),
+          child: ListView.builder(
+            itemCount: controller.notifications.length,
+            itemBuilder: (context, index) {
+              final notification = controller.notifications[index];
+              return NotificationCard(
+                notification: notification,
+                onTap: () => controller.marquerCommeLue(notification.id!),
+                onDelete: () =>
+                    controller.supprimerNotification(notification.id!),
+              );
+            },
+          ),
         );
       }),
     );
@@ -104,6 +143,7 @@ class NotificationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      elevation: notification.isRead ? 1 : 3, // Mise en évidence des non-lues
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -169,12 +209,20 @@ class NotificationCard extends StatelessWidget {
 
   IconData _getIconForType(String type) {
     switch (type.toLowerCase()) {
-      case 'transfert':
-        return Icons.swap_horiz;
       case 'reorientation':
-        return Icons.change_circle;
+        return Icons.swap_horiz;
       case 'system':
-        return Icons.info;
+        return Icons.computer;
+      case 'transfert':
+        return Icons.move_to_inbox;
+      case 'email':
+        return Icons.email;
+      case 'rappel':
+        return Icons.alarm;
+      case 'statut_demande':
+        return Icons.track_changes;
+      case 'demande_reorientation':
+        return Icons.sync_alt;
       default:
         return Icons.notifications;
     }

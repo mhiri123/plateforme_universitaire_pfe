@@ -54,7 +54,7 @@ class LoginController extends GetxController {
 
       final token = authResponse.token;
       if (token != null && token.isNotEmpty) {
-        await _storage.write(key: 'auth_token', value: token);
+        await _storage.write(key: 'token', value: token);
         print("Token stocké : $token");
       } else {
         print("⚠️ Token manquant dans la réponse");
@@ -75,8 +75,9 @@ class LoginController extends GetxController {
 
       final userController = Get.put(UserController());
       await userController.setUser(user.email, user.role, user.id);
-      
-      final NotificationService notificationService = Get.put(NotificationService(
+
+      final NotificationService notificationService =
+          Get.put(NotificationService(
         secureStorage: Get.find<FlutterSecureStorage>(),
       ));
       Get.put(NotificationController(Get.find<NotificationService>()));
@@ -101,7 +102,7 @@ class LoginController extends GetxController {
   }
 
   void _initializeControllers() {
-    Get.put(DemandeReorientationService(dio: Get.find<Dio>()));
+    Get.put(DemandeReorientationService(Get.find<Dio>()));
     Get.put(ChatController());
     Get.put(DemandeTransfertEtudiantController());
     Get.put(DemandeTransfertEnseignantController());

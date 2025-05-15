@@ -29,6 +29,7 @@ class ServiceLocator {
 
     Get.lazyPut(() => ApiService(
           Get.find<Dio>(),
+          baseUrl: 'http://172.23.0.1:8000/api',
         ));
 
     Get.lazyPut<NotificationService>(

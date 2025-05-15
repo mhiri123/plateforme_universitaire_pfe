@@ -36,11 +36,13 @@ dependencies:
   rive: ^0.11.4
   cupertino_icons: ^1.0.2
   animated_background: ^2.0.0
+  pull_to_refresh: ^2.0.0
 
   # Utilities
   intl: ^0.18.1
   file_picker: ^10.1.4
   timeago: ^3.6.0
+  connectivity_plus: ^5.0.2
 
 flutter:
   uses-material-design: true

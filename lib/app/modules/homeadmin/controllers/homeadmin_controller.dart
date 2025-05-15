@@ -8,9 +8,12 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/material.dart';
 
 class AdminHomeController extends GetxController {
-  final RxList<DemandeReorientation> demandesReorientation = <DemandeReorientation>[].obs;
-  final RxList<DemandeTransfertEtudiant> demandesTransfertEtudiant = <DemandeTransfertEtudiant>[].obs;
-  final RxList<DemandeTransfertEnseignant> demandesTransfertEnseignant = <DemandeTransfertEnseignant>[].obs;
+  final RxList<DemandeReorientation> demandesReorientation =
+      <DemandeReorientation>[].obs;
+  final RxList<DemandeTransfertEtudiant> demandesTransfertEtudiant =
+      <DemandeTransfertEtudiant>[].obs;
+  final RxList<DemandeTransfertEnseignant> demandesTransfertEnseignant =
+      <DemandeTransfertEnseignant>[].obs;
 
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
@@ -36,14 +39,14 @@ class AdminHomeController extends GetxController {
       // Récupérer le nom de la faculté de l'admin
       final userRole = _storage.read('userRole');
       final userEmail = _storage.read('userEmail');
-      
+
       if (userRole != 'admin') {
         throw Exception('Accès non autorisé');
       }
 
       // Charger les demandes de réorientation
       await recupererDemandesReorientation();
-      
+
       // Mettre à jour le compteur de demandes en attente
       nombreDemandesEnAttente.value = demandesReorientation
           .where((demande) => demande.statut == StatutDemande.enAttente)
@@ -52,7 +55,6 @@ class AdminHomeController extends GetxController {
       // Charger les autres types de demandes si nécessaire
       await recupererDemandesTransfertEtudiant();
       await recupererDemandesTransfertEnseignant();
-
     } catch (e) {
       print('❌ Erreur lors du chargement des données: $e');
       errorMessage.value = e.toString();
@@ -66,8 +68,10 @@ class AdminHomeController extends GetxController {
       final demandes = await _service.listerDemandesEnAttente();
       demandesReorientation.value = demandes;
     } catch (e) {
-      print('❌ Erreur lors de la récupération des demandes de réorientation: $e');
-      errorMessage.value = 'Erreur lors de la récupération des demandes de réorientation';
+      print(
+          '❌ Erreur lors de la récupération des demandes de réorientation: $e');
+      errorMessage.value =
+          'Erreur lors de la récupération des demandes de réorientation';
       rethrow;
     }
   }
@@ -77,8 +81,10 @@ class AdminHomeController extends GetxController {
       // Implémenter la récupération des demandes de transfert étudiant
       demandesTransfertEtudiant.value = [];
     } catch (e) {
-      print('❌ Erreur lors de la récupération des demandes de transfert étudiant: $e');
-      errorMessage.value = 'Erreur lors de la récupération des demandes de transfert étudiant';
+      print(
+          '❌ Erreur lors de la récupération des demandes de transfert étudiant: $e');
+      errorMessage.value =
+          'Erreur lors de la récupération des demandes de transfert étudiant';
     }
   }
 
@@ -87,25 +93,29 @@ class AdminHomeController extends GetxController {
       // Implémenter la récupération des demandes de transfert enseignant
       demandesTransfertEnseignant.value = [];
     } catch (e) {
-      print('❌ Erreur lors de la récupération des demandes de transfert enseignant: $e');
-      errorMessage.value = 'Erreur lors de la récupération des demandes de transfert enseignant';
+      print(
+          '❌ Erreur lors de la récupération des demandes de transfert enseignant: $e');
+      errorMessage.value =
+          'Erreur lors de la récupération des demandes de transfert enseignant';
     }
   }
 
-  Future<void> traiterDemandeReorientation(DemandeReorientation demande, bool accepter) async {
+  Future<void> traiterDemandeReorientation(
+      DemandeReorientation demande, bool accepter) async {
     try {
       isLoading.value = true;
       errorMessage.value = '';
 
       await _service.traiterDemande(
-        demande: demande,
-        isAccepted: accepter,
-        commentaire: accepter ? "Votre demande a été acceptée." : "Votre demande a été rejetée.",
-      );
+          demande.id.toString(),
+          accepter,
+          accepter
+              ? "Votre demande a été acceptée."
+              : "Votre demande a été rejetée.");
 
       // Mettre à jour la liste des demandes
       await recupererDemandesReorientation();
-      
+
       // Mettre à jour le compteur
       nombreDemandesEnAttente.value = demandesReorientation
           .where((d) => d.statut == StatutDemande.enAttente)

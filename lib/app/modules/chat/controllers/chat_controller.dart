@@ -112,7 +112,7 @@ class ChatController extends GetxController {
       );
 
       final response = await http.post(
-        Uri.parse('http://192.168.1.17:8000/api/send-message'),
+        Uri.parse('http://172.23.0.1:8000/api/send-message'),
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',

@@ -19,7 +19,7 @@ class DemandereoBinding extends Bindings {
 
     // Injecter le service
     Get.lazyPut<DemandeReorientationService>(
-      () => DemandeReorientationService(dio: Get.find<Dio>()),
+      () => DemandeReorientationService(Get.find<Dio>()),
     );
 
     // Injecter le contrôleur

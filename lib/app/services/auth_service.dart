@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 class AuthService {
   final Dio _dio;
   final FlutterSecureStorage _storage;
-  static const String _baseUrl = 'http://192.168.1.17:8000/api';
+  static const String _baseUrl = 'http://172.23.0.1:8000/api';
 
   AuthService({
     required Dio dio,

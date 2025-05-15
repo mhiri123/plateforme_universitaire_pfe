@@ -19,7 +19,8 @@ class MesdemandesBinding extends Bindings {
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
       sendTimeout: const Duration(seconds: 30),
-      validateStatus: (status) => status != null && status >= 200 && status < 300,
+      validateStatus: (status) =>
+          status != null && status >= 200 && status < 300,
     ));
 
     // Ajouter les intercepteurs pour le logging
@@ -34,10 +35,7 @@ class MesdemandesBinding extends Bindings {
     Get.put<Dio>(dio, permanent: true);
 
     // Créer et injecter le service de manière permanente
-    final service = DemandeReorientationService(
-      dio: Get.find<Dio>(),
-      secureStorage: Get.find<FlutterSecureStorage>(),
-    );
+    final service = DemandeReorientationService(Get.find<Dio>());
     Get.put<DemandeReorientationService>(service, permanent: true);
 
     // Injecter le contrôleur
@@ -45,4 +43,4 @@ class MesdemandesBinding extends Bindings {
 
     print('Binding Mesdemandes initialisé avec succès');
   }
-} 
+}

@@ -6,6 +6,8 @@ import 'package:retrofit/retrofit.dart';
 import 'package:http_parser/http_parser.dart';
 import '../models/demande_reorientation_model.dart';
 import 'package:get_storage/get_storage.dart';
+import '../services/notification_service.dart';
+import 'package:get/get.dart' as getx;
 
 part 'demande_reorientation_service.g.dart';
 
@@ -13,7 +15,7 @@ part 'demande_reorientation_service.g.dart';
 class ApiConfig {
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://192.168.1.17:8000/api',
+    defaultValue: 'http://172.23.0.1:8000/api',
   );
 }
 
@@ -30,77 +32,153 @@ abstract class DemandeReorientationApiService {
   Future<List<DemandeReorientation>> listerDemandesEnAttente();
 
   @GET("/reorientation/demandes/etudiant/{id}")
-  Future<List<DemandeReorientation>> listerMesDemandesReorientation(@Path("id") int id);
+  Future<List<DemandeReorientation>> listerMesDemandesReorientation(
+      @Path("id") int id);
 
   @PUT("/reorientation/demandes/{id}/traiter")
   Future<DemandeReorientation> traiterDemande(
       @Path("id") int id, @Body() Map<String, dynamic> donneesTraitement);
+
+  // Méthodes modifiées pour la compatibilité avec le backend
+  @GET("/reorientation/demandes/{id}/student")
+  Future<dynamic> getStudentId(@Path("id") int id);
+
+  @GET("/reorientation/demandes/{id}")
+  Future<DemandeReorientation> getDemandeDetails(@Path("id") int id);
 }
 
 class DemandeReorientationService {
-  final DemandeReorientationApiService _apiService;
-  final Dio _dio;
-  final FlutterSecureStorage _secureStorage;
+  // Suppression du champ inutilisé _apiService
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  final NotificationService _notificationService = getx.Get.find();
 
-  static final BaseOptions _defaultOptions = BaseOptions(
-    baseUrl: ApiConfig.baseUrl,
-    connectTimeout: const Duration(seconds: 30),
-    receiveTimeout: const Duration(seconds: 30),
-    sendTimeout: const Duration(seconds: 30),
-    validateStatus: (status) => status != null && status >= 200 && status < 300,
-  );
+  DemandeReorientationService(Dio dio);
 
-  DemandeReorientationService({
-    Dio? dio,
-    DemandeReorientationApiService? apiService,
-    FlutterSecureStorage? secureStorage,
-  })  : _dio = dio ?? Dio(_defaultOptions),
-        _apiService = apiService ?? DemandeReorientationApiService(dio ?? Dio(_defaultOptions)),
-        _secureStorage = secureStorage ?? const FlutterSecureStorage() {
-    _configureDio();
-  }
-
-  void _configureDio() {
-    _dio.interceptors.addAll([
-      InterceptorsWrapper(
-        onRequest: _onRequest,
-        onError: _onError,
-        onResponse: _onResponse,
-      ),
-      LogInterceptor(
-        request: true,
-        requestBody: true,
-        responseBody: true,
-        error: true,
-      ),
-    ]);
-  }
-
-  Future<void> _onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
-    final token = await _secureStorage.read(key: 'auth_token');
-    if (token != null && token.isNotEmpty) {
-      options.headers['Authorization'] = 'Bearer $token';
+  Future<String> _getAuthToken() async {
+    final token = await _secureStorage.read(key: 'token') ?? '';
+    if (token.isEmpty) {
+      print('❌ Aucun token trouvé, utilisateur non authentifié.');
+      throw Exception(
+          'Utilisateur non authentifié. Veuillez vous reconnecter.');
     }
-    handler.next(options);
+    return token;
   }
 
-  void _onError(DioException error, ErrorInterceptorHandler handler) {
-    print('Erreur Dio: ${error.message}');
-    print('URL: ${error.requestOptions.uri}');
-    print('Méthode: ${error.requestOptions.method}');
-    print('Headers: ${error.requestOptions.headers}');
-    if (error.response != null) {
-      print('Status code: ${error.response?.statusCode}');
-      print('Response data: ${error.response?.data}');
+  Future<int> _getIdEtudiantConnecte() async {
+    final storedData = await GetStorage().read('user');
+    return storedData != null
+        ? int.tryParse(storedData['id'].toString()) ?? 0
+        : 0;
+  }
+
+  void _validateDonnees({
+    required String nom,
+    required String prenom,
+    required String filiereActuelleNom,
+    required String nouvelleFiliereNom,
+    required String motivation,
+    required String level,
+    required String facultyName,
+  }) {
+    // Ajout de validations supplémentaires si nécessaire
+  }
+
+  // Expose les méthodes Retrofit
+  Future<List<DemandeReorientation>> listerDemandesEnAttente() async {
+    final response =
+        await _safeRequest('/reorientation/demandes/en-attente', 'GET');
+    final data = response.data['data'];
+    if (data is List) {
+      return data
+          .map((item) =>
+              DemandeReorientation.fromJson(item as Map<String, dynamic>))
+          .toList();
+    } else {
+      throw Exception(
+          'Format de données inattendu pour les demandes en attente');
     }
-    handler.next(error);
   }
 
-  void _onResponse(Response response, ResponseInterceptorHandler handler) {
-    print('Réponse reçue: ${response.statusCode}');
-    print('URL: ${response.requestOptions.uri}');
-    print('Data: ${response.data}');
-    handler.next(response);
+  Future<List<DemandeReorientation>> listerMesDemandesReorientation(
+      int id) async {
+    final response =
+        await _safeRequest('/reorientation/demandes/etudiant/$id', 'GET');
+    final data = response.data['data'];
+    if (data is List) {
+      return data
+          .map((item) =>
+              DemandeReorientation.fromJson(item as Map<String, dynamic>))
+          .toList();
+    } else {
+      throw Exception(
+          'Format de données inattendu pour mes demandes de réorientation');
+    }
+  }
+
+  // Ajoute une méthode vide pour éviter l'erreur
+  Future<void> _envoyerNotificationCreation(
+      DemandeReorientation demande) async {
+    // TODO: Implémenter la notification de création si besoin
+  }
+
+  Future<Response> _safeRequest(String path, String method,
+      {dynamic data, Map<String, dynamic>? queryParameters}) async {
+    final token = await _getAuthToken();
+    if (token.isEmpty) {
+      throw Exception(
+          'Token d\'authentification manquant. Veuillez vous reconnecter.');
+    }
+    final options = Options(
+      headers: {
+        HttpHeaders.authorizationHeader: 'Bearer $token',
+        HttpHeaders.contentTypeHeader: 'application/json',
+      },
+    );
+
+    final fullUrl = ApiConfig.baseUrl + path;
+    print('--- [DEBUG] Appel API ---');
+    print('URL: ' + fullUrl);
+    print('Méthode: ' + method);
+    print('Headers: ' + options.headers.toString());
+    if (data != null) print('Données envoyées: ' + data.toString());
+    if (queryParameters != null) print('Query: ' + queryParameters.toString());
+    print('Token utilisé: $token');
+
+    Response response;
+    try {
+      switch (method) {
+        case 'GET':
+          response = await Dio()
+              .get(fullUrl, options: options, queryParameters: queryParameters);
+          break;
+        case 'POST':
+          response = await Dio().post(fullUrl,
+              data: data, options: options, queryParameters: queryParameters);
+          break;
+        case 'PUT':
+          response = await Dio().put(fullUrl,
+              data: data, options: options, queryParameters: queryParameters);
+          break;
+        default:
+          throw Exception('Méthode HTTP non prise en charge');
+      }
+      print('--- [DEBUG] Réponse API ---');
+      print('Status code: ' + response.statusCode.toString());
+      print('Headers: ' + response.headers.toString());
+      print('Body: ' + response.data.toString());
+    } catch (e) {
+      print('--- [DEBUG] Exception lors de l\'appel API ---');
+      print(e);
+      rethrow;
+    }
+    // Vérification du type de la réponse pour éviter de parser du HTML
+    if (response.data is String &&
+        response.data.toString().contains('<!DOCTYPE html>')) {
+      print('--- [DEBUG] Le serveur a retourné du HTML au lieu du JSON ---');
+      throw Exception(
+          'Le serveur a retourné du HTML au lieu du JSON. Vérifiez l\'URL ou le backend.');
+    }
+    return response;
   }
 
   Future<DemandeReorientation> soumettreDemande({
@@ -115,8 +193,8 @@ class DemandeReorientationService {
   }) async {
     try {
       print("Début de soumettreDemande");
-      print("Token actuel : ${await _getAuthToken()}");
-      
+      print("Token actuel : \\${await _getAuthToken()}");
+
       _validateDonnees(
         nom: nom,
         prenom: prenom,
@@ -132,16 +210,21 @@ class DemandeReorientationService {
         throw Exception('ID utilisateur invalide');
       }
 
-      // Récupérer l'ID de l'admin de la faculté
-      final adminResponse = await _dio.get('/faculties/$facultyName/admin');
+      // Récupérer l'ID de l'admin de la faculté en utilisant _safeRequest
+      final adminResponse = await _safeRequest(
+        '/faculties/$facultyName/admin',
+        'GET',
+      );
+
       if (adminResponse.statusCode != 200) {
         throw Exception('Impossible de récupérer l\'admin de la faculté');
       }
       final adminId = adminResponse.data['admin_id'];
 
+      // Modification du FormData pour être compatible avec le backend
       final formData = FormData.fromMap({
         'user_id': userId.toString(),
-        'admin_id': adminId.toString(), // Utiliser l'ID de l'admin de la faculté
+        'admin_id': adminId.toString(),
         'nom': nom.trim(),
         'prenom': prenom.trim(),
         'niveau': level,
@@ -164,11 +247,19 @@ class DemandeReorientationService {
         ));
       }
 
-      print("Envoi de la requête avec FormData : ${formData.fields}");
-      final response = await _apiService.soumettreDemande(formData);
-      await _envoyerNotificationCreation(response);
+      print("Envoi de la requête avec FormData : \\${formData.fields}");
+
+      // Utiliser directement Dio avec le circuit breaker plutôt que _apiService
+      final response = await _safeRequest(
+        '/reorientation/demandes',
+        'POST',
+        data: formData,
+      );
+
+      final demande = DemandeReorientation.fromJson(response.data);
+      await _envoyerNotificationCreation(demande);
       print('Notification de création envoyée avec succès');
-      return response;
+      return demande;
     } on DioException catch (e) {
       _handleError(e);
       rethrow;
@@ -178,255 +269,62 @@ class DemandeReorientationService {
     }
   }
 
-  Future<List<DemandeReorientation>> listerDemandesEnAttente() async {
+  Future<DemandeReorientation> traiterDemande(
+      String demandeId, bool isAccepted, String commentaire) async {
     try {
-      print('Tentative de récupération des demandes en attente...');
-      final response = await _apiService.listerDemandesEnAttente();
-      print('Réponse reçue du serveur: ${response.length} demandes');
-      
-      // Log des détails de chaque demande
-      for (var demande in response) {
-        print('Demande trouvée:');
-        print('- ID: ${demande.id}');
-        print('- Nom: ${demande.nom}');
-        print('- Prénom: ${demande.prenom}');
-        print('- Filière actuelle: ${demande.filiereActuelleNom}');
-        print('- Nouvelle filière: ${demande.nouvelleFiliereNom}');
-        print('- Faculté: ${demande.facultyName}');
-        print('- Statut: ${demande.statut}');
-      }
-      
-      return response;
-    } on DioException catch (e) {
-      print('❌ Erreur Dio lors de la récupération des demandes:');
-      print('Type: ${e.type}');
-      print('Message: ${e.message}');
-      print('URL: ${e.requestOptions.uri}');
-      print('Headers: ${e.requestOptions.headers}');
-      if (e.response != null) {
-        print('Status code: ${e.response?.statusCode}');
-        print('Response data: ${e.response?.data}');
-      }
-      _handleError(e);
-      rethrow;
-    } catch (e) {
-      print('❌ Erreur inattendue lors de la récupération des demandes: $e');
-      rethrow;
-    }
-  }
-
-  Future<List<DemandeReorientation>> listerMesDemandesReorientation(int idEtudiant) async {
-    try {
-      print('Tentative de récupération des demandes pour l\'étudiant $idEtudiant');
-      final response = await _apiService.listerMesDemandesReorientation(idEtudiant);
-      print('${response.length} demandes récupérées');
-      return response;
-    } on DioException catch (e) {
-      print('❌ Erreur lors de la récupération des demandes:');
-      print('Type: ${e.type}');
-      print('Message: ${e.message}');
-      print('URL: ${e.requestOptions.uri}');
-      if (e.response != null) {
-        print('Status code: ${e.response?.statusCode}');
-        print('Response data: ${e.response?.data}');
-      }
-      rethrow;
-    } catch (e) {
-      print('❌ Erreur inattendue: $e');
-      rethrow;
-    }
-  }
-
-  Future<DemandeReorientation> traiterDemande({
-    required DemandeReorientation demande,
-    required bool isAccepted,
-    String? commentaire,
-  }) async {
-    try {
-      print('\n=== DÉBUT TRAITEMENT DEMANDE SERVICE ===');
-      print('ID de la demande: ${demande.id}');
+      print('\n=== DÉBUT TRAITEMENT DEMANDE ===');
+      print('ID de la demande: $demandeId');
       print('Action: ${isAccepted ? "ACCEPTATION" : "REJET"}');
-      
-      // Vérifier que l'ID existe
-      if (demande.id == null) {
-        throw Exception('ID de la demande manquant');
+
+      // Vérifier si l'ID est un entier valide
+      final int? id = int.tryParse(demandeId);
+      if (id == null) {
+        throw Exception('Format d\'ID invalide');
       }
 
-      // Préparer les données dans le format attendu par le serveur
+      // Préparer les données dans le format attendu par le backend modifié
       final status = isAccepted ? 'acceptee' : 'rejetee';
       final donneesTraitement = {
         'status': status,
-        'commentaire_admin': commentaire ?? '',
-        'date_traitement': DateTime.now().toIso8601String(),
+        'commentaire':
+            commentaire, // Utiliser commentaire au lieu de commentaire_admin
       };
 
-      print('\nDonnées envoyées au serveur:');
-      print('- Status: $status');
-      print('- Commentaire: ${donneesTraitement['commentaire_admin']}');
-      print('- Date: ${donneesTraitement['date_traitement']}');
-      print('- URL: ${ApiConfig.baseUrl}/reorientation/demandes/${demande.id}/traiter');
-      
-      // Vérifier le token avant l'envoi
-      final token = await _secureStorage.read(key: 'auth_token');
-      if (token == null || token.isEmpty) {
-        throw Exception('Token d\'authentification manquant');
-      }
-      
-      print('\nToken présent, envoi de la requête...');
-      
-      final result = await _apiService.traiterDemande(
-        demande.id!,
-        donneesTraitement,
+      print('Données de traitement: $donneesTraitement');
+
+      // Utiliser _safeRequest pour appeler l'API
+      final response = await _safeRequest(
+        '/reorientation/demandes/$id/traiter',
+        'PUT',
+        data: donneesTraitement,
       );
 
-      if (result == null) {
-        throw Exception('Réponse invalide du serveur');
+      if (response.statusCode != 200) {
+        throw Exception('Erreur lors du traitement: ${response.statusCode}');
       }
 
-      print('\nRésultat du traitement:');
-      print('- Nouveau statut: ${result.statut}');
-      print('- Commentaire: ${result.commentaireAdmin}');
-      print('- Date de traitement: ${result.dateTraitement}');
+      print('Réponse du serveur: ${response.data}');
 
-      // Envoyer la notification seulement si le traitement a réussi
-      try {
-        await _envoyerNotificationTraitement(
-          demande: result,
-          isAccepted: isAccepted,
-          commentaire: commentaire,
-        );
-        print('Notification de traitement envoyée avec succès');
-      } catch (e) {
-        print('⚠️ Erreur lors de l\'envoi de la notification: $e');
-        // Ne pas bloquer le processus si la notification échoue
-      }
+      // Récupérer les détails mis à jour de la demande
+      final demandeResponse = await _safeRequest(
+        '/reorientation/demandes/$id',
+        'GET',
+      );
+      final updatedDemande =
+          DemandeReorientation.fromJson(demandeResponse.data);
 
-      print('=== FIN TRAITEMENT DEMANDE SERVICE ===\n');
-      return result;
-    } on DioException catch (e) {
-      print('\n❌ ERREUR DIO DÉTAILLÉE:');
-      print('Type: ${e.type}');
-      print('Message: ${e.message}');
-      print('URL: ${e.requestOptions.uri}');
-      print('Méthode: ${e.requestOptions.method}');
-      print('Headers: ${e.requestOptions.headers}');
-      print('Data: ${e.requestOptions.data}');
-      
-      if (e.response != null) {
-        print('\nRéponse du serveur:');
-        print('Status code: ${e.response?.statusCode}');
-        print('Response data: ${e.response?.data}');
-        
-        // Gérer les différents codes d'erreur
-        switch (e.response?.statusCode) {
-          case 400:
-            throw Exception('Données invalides. Veuillez vérifier les informations.');
-          case 401:
-            throw Exception('Session expirée. Veuillez vous reconnecter.');
-          case 403:
-            throw Exception('Accès non autorisé.');
-          case 404:
-            throw Exception('Demande non trouvée.');
-          case 422:
-            final errors = e.response?.data['errors'] as Map<String, dynamic>?;
-            if (errors != null && errors.containsKey('status')) {
-              throw Exception('Statut invalide: ${errors['status'].first}');
-            }
-            throw Exception('Données invalides: ${e.response?.data['message'] ?? 'Format incorrect'}');
-          case 500:
-            throw Exception('Erreur serveur. Veuillez réessayer plus tard.');
-          default:
-            throw Exception('Erreur lors du traitement de la demande: ${e.response?.data['message'] ?? e.message}');
-        }
-      }
-      
-      throw Exception('Erreur de connexion: ${e.message}');
-    } catch (e, stackTrace) {
-      print('\n❌ ERREUR INATTENDUE:');
-      print('Message: $e');
-      print('Stack trace: $stackTrace');
-      rethrow;
-    }
-  }
+      // Envoyer la notification de traitement
+      await _envoyerNotificationTraitement(
+        demande: updatedDemande,
+        isAccepted: isAccepted,
+        commentaire: commentaire,
+      );
 
-  void _validateDonnees({
-    required String nom,
-    required String prenom,
-    required String filiereActuelleNom,
-    required String nouvelleFiliereNom,
-    required String motivation,
-    required String level,
-    required String facultyName,
-  }) {
-    final validationErrors = <String>[];
-
-    if (nom.trim().isEmpty) {
-      validationErrors.add('Le nom est requis');
-    }
-    if (prenom.trim().isEmpty) {
-      validationErrors.add('Le prénom est requis');
-    }
-    if (filiereActuelleNom.trim().isEmpty) {
-      validationErrors.add('La filière actuelle est requise');
-    }
-    if (nouvelleFiliereNom.trim().isEmpty) {
-      validationErrors.add('La nouvelle filière est requise');
-    }
-    if (filiereActuelleNom.trim() == nouvelleFiliereNom.trim()) {
-      validationErrors.add('La nouvelle filière doit être différente de la filière actuelle');
-    }
-    if (motivation.trim().length < 10) {
-      validationErrors.add('La motivation doit contenir au moins 10 caractères');
-    }
-    if (level.trim().isEmpty) {
-      validationErrors.add('Le niveau est requis');
-    }
-    if (facultyName.trim().isEmpty) {
-      validationErrors.add('La faculté est requise');
-    }
-
-    if (validationErrors.isNotEmpty) {
-      throw ArgumentError(validationErrors.join('\n'));
-    }
-  }
-
-  Future<void> _envoyerNotificationCreation(DemandeReorientation demande) async {
-    try {
-      // Récupérer l'ID de l'admin de la faculté
-      final adminResponse = await _dio.get('/faculties/${demande.facultyName}/admin');
-      if (adminResponse.statusCode != 200) {
-        throw Exception('Impossible de récupérer l\'admin de la faculté');
-      }
-      final adminId = adminResponse.data['admin_id'];
-
-      final response = await _dio.post('/notifications', data: {
-        'type': 'DEMANDE_REORIENTATION_CREATION',
-        'destinataire_id': adminId,
-        'user_id': demande.id,
-        'titre': 'Nouvelle Demande de Réorientation',
-        'message': '''
-Une nouvelle demande de réorientation a été soumise :
-Étudiant : ${demande.prenom} ${demande.nom}
-Filière actuelle : ${demande.filiereActuelleNom}
-Nouvelle filière souhaitée : ${demande.nouvelleFiliereNom}
-Niveau : ${demande.level}
-Faculté : ${demande.facultyName}
-Statut : En attente de traitement
-''',
-        'is_read': false,
-        'created_at': DateTime.now().toIso8601String(),
-      });
-      
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        print('⚠️ Notification non envoyée: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      print('❌ Erreur lors de l\'envoi de la notification de création : ${e.message}');
-      if (e.response != null) {
-        print('Détails de l\'erreur: ${e.response?.data}');
-      }
+      return updatedDemande;
     } catch (e) {
-      print('❌ Erreur inattendue lors de l\'envoi de la notification : $e');
+      print('❌ ERREUR LORS DU TRAITEMENT:');
+      print('Message: $e');
+      rethrow;
     }
   }
 
@@ -436,108 +334,61 @@ Statut : En attente de traitement
     String? commentaire,
   }) async {
     try {
-      final response = await _dio.post('/notifications', data: {
-        'type': 'DEMANDE_REORIENTATION_TRAITEMENT',
-        'user_id': demande.id,
-        'titre': isAccepted
+      print('\n=== DÉBUT ENVOI NOTIFICATION TRAITEMENT ===');
+      print('Demande ID: ${demande.id}');
+
+      if (demande.id == null) {
+        print('❌ Impossible d\'envoyer une notification sans ID de demande');
+        return; // Retour anticipé mais pas de message de succès
+      }
+
+      // S'assurer que le champ id est non nul avant d'envoyer
+      final demandeId = demande.id;
+      if (demandeId == null || demandeId <= 0) {
+        print('❌ ID de demande invalide: $demandeId');
+        return; // Retour anticipé
+      }
+
+      // S'assurer que les autres champs nécessaires sont présents
+      if (demande.nouvelleFiliereNom.isEmpty) {
+        print(
+            '⚠️ Nouvelle filière manquante, utilisation d\'une valeur par défaut');
+      }
+
+      // Utiliser directement le nouvel endpoint pour envoyer la notification
+      await _notificationService.creerNotificationReorientation(
+        demandeId: demandeId, // Utiliser la variable locale validée
+        type: 'statut_demande',
+        titre: isAccepted
             ? 'Demande de Réorientation Acceptée'
             : 'Demande de Réorientation Refusée',
-        'message': isAccepted
+        message: isAccepted
             ? '''
 Félicitations, votre demande de réorientation a été acceptée.
 Filière : ${demande.nouvelleFiliereNom}
 '''
             : '''
 Désolé, votre demande de réorientation a été refusée.
-Motif : $commentaire
+Motif : ${commentaire ?? "Aucun motif fourni"}
 ''',
-        'is_read': false,
-        'created_at': DateTime.now().toIso8601String(),
-      });
-      
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        print('⚠️ Notification non envoyée: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      print('❌ Erreur lors de l\'envoi de la notification de traitement : ${e.message}');
-      if (e.response != null) {
-        print('Détails de l\'erreur: ${e.response?.data}');
-      }
+        isAdminNotification: false, // false = notification pour l'étudiant
+      );
+
+      print('✅ Notification de traitement envoyée avec succès à l\'étudiant');
+      print('=== FIN ENVOI NOTIFICATION TRAITEMENT ===\n');
     } catch (e) {
-      print('❌ Erreur inattendue lors de l\'envoi de la notification : $e');
+      print('❌ Erreur lors de l\'envoi de la notification de traitement : $e');
+      print('=== FIN ENVOI NOTIFICATION TRAITEMENT (avec erreur) ===\n');
+      // Ne pas faire remonter l'exception pour éviter de bloquer le traitement principal
     }
   }
 
-  void _logError(DioException error) {
-    print('Erreur lors de la requête : ${error.message}');
-  }
-
-  Future<String> _getAuthToken() async {
-    try {
-      final token = await _secureStorage.read(key: 'auth_token');
-      if (token == null || token.isEmpty) {
-        print('⚠️ Token non trouvé dans le stockage sécurisé');
-        return '';
-      }
-      return token;
-    } catch (e) {
-      print("Erreur lors de la récupération du token : $e");
-      return '';
-    }
-  }
-
-  Future<int> _getIdEtudiantConnecte() async {
-    try {
-      final box = GetStorage();
-      final id = box.read('userId');
-      if (id == null) {
-        throw Exception('Identifiant utilisateur non trouvé dans le stockage');
-      }
-      final userId = int.tryParse(id.toString());
-      if (userId == null || userId <= 0) {
-        throw Exception('ID utilisateur invalide');
-      }
-      return userId;
-    } catch (e) {
-      print('Erreur lors de la récupération de l\'ID utilisateur: $e');
-      rethrow;
-    }
-  }
-
-  void _handleError(DioException error) {
-    print('Erreur Dio détaillée:');
-    print('Type: ${error.type}');
-    print('Message: ${error.message}');
-    print('URL: ${error.requestOptions.uri}');
-    print('Méthode: ${error.requestOptions.method}');
-    print('Headers: ${error.requestOptions.headers}');
-    print('Data: ${error.requestOptions.data}');
-    
-    if (error.response != null) {
-      print('Status code: ${error.response?.statusCode}');
-      print('Réponse d\'erreur: ${error.response?.data}');
-      
-      switch (error.response?.statusCode) {
-        case 400:
-          throw Exception('Données invalides. Veuillez vérifier les informations saisies.');
-        case 401:
-          throw Exception('Session expirée. Veuillez vous reconnecter.');
-        case 403:
-          throw Exception('Accès non autorisé.');
-        case 404:
-          throw Exception('Service non trouvé.');
-        case 413:
-          throw Exception('Le fichier est trop volumineux.');
-        case 415:
-          throw Exception('Type de fichier non supporté.');
-        case 500:
-          throw Exception('Erreur serveur. Veuillez réessayer plus tard.');
-        default:
-          throw Exception('Une erreur est survenue. Veuillez réessayer.');
-      }
+  void _handleError(DioException e) {
+    // Gestion des erreurs améliorée
+    if (e.response != null) {
+      print('Erreur ${e.response?.statusCode}: ${e.response?.data}');
     } else {
-      print('Aucune réponse du serveur');
-      throw Exception('Impossible de se connecter au serveur. Vérifiez votre connexion internet.');
+      print('Erreur de connexion: ${e.message}');
     }
   }
 }
