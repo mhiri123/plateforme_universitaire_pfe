@@ -244,4 +244,7 @@ class NotificationController extends GetxController {
       print('❌ $error');
     }
   }
+
+  // Getter pour le nombre de notifications non lues
+  int get unreadCount => notifications.where((n) => !(n.isRead)).length;
 }

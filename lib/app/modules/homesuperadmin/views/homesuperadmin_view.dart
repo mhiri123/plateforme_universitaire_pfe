@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:plateforme_universitaire/app/routes/app_pages.dart';
+import '../../notification/controllers/notification_controller.dart';
 import '../controllers/homesuperadmin_controller.dart';
 
 class SuperAdminHomeScreen extends StatelessWidget {
-  final SuperAdminHomeController controller = Get.put(SuperAdminHomeController());
+  final SuperAdminHomeController controller =
+      Get.put(SuperAdminHomeController());
 
   @override
   Widget build(BuildContext context) {
@@ -42,29 +44,36 @@ class SuperAdminHomeScreen extends StatelessWidget {
         ),
       ),
       actions: [
-        Obx(() => IconButton(
-          icon: Stack(
+        // Badge notifications super admin
+        GetBuilder<NotificationController>(
+          builder: (notificationController) => Stack(
             children: [
-              const Icon(Icons.notifications, color: Colors.white),
-              if (controller.notificationCount.value > 0)
+              IconButton(
+                icon: const Icon(Icons.notifications, color: Colors.white),
+                onPressed: () => _navigateToRoute(Routes.NOTIFICATION),
+              ),
+              if (notificationController.unreadCount > 0)
                 Positioned(
-                  right: 0,
-                  child: CircleAvatar(
-                    radius: 10,
-                    backgroundColor: Colors.red,
+                  right: 6,
+                  top: 6,
+                  child: Container(
+                    padding: EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
                     child: Text(
-                      controller.notificationCount.value.toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                      ),
+                      '${notificationController.unreadCount}',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
             ],
           ),
-          onPressed: () => _navigateToRoute(Routes.NOTIFICATION),
-        )),
+        ),
       ],
     );
   }
@@ -199,9 +208,9 @@ class SuperAdminHomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 5),
                   Obx(() => Text(
-                    "Vous avez ${controller.notificationCount.value} notifications et ${controller.requests.length} demandes en attente",
-                    style: TextStyle(color: Colors.grey.shade600),
-                  )),
+                        "Vous avez ${controller.notificationCount.value} notifications et ${controller.requests.length} demandes en attente",
+                        style: TextStyle(color: Colors.grey.shade600),
+                      )),
                 ],
               ),
             ),
@@ -300,22 +309,85 @@ class SuperAdminHomeScreen extends StatelessWidget {
 }
 
 final List<Map<String, dynamic>> menuItems = [
-  {"icon": Icons.dashboard, "title": "Tableau de Bord", "route": Routes.HOMESUPERADMIN},
-  {"icon": Icons.school, "title": "Facultés", "route": Routes.FACULTY_MANAGEMENT},
-  {"icon": Icons.admin_panel_settings, "title": "Administrateurs", "route": Routes.ADMIN_MANAGEMENT},
-  {"icon": Icons.people, "title": "Utilisateurs", "route": Routes.USER_MANAGEMENT},
-  {"icon": Icons.assignment, "title": "Demandes", "route": Routes.REQUEST_MANAGEMENT},
-  {"icon": Icons.security, "title": "Permissions", "route": Routes.PERMISSION_MANAGEMENT},
+  {
+    "icon": Icons.dashboard,
+    "title": "Tableau de Bord",
+    "route": Routes.HOMESUPERADMIN
+  },
+  {
+    "icon": Icons.school,
+    "title": "Facultés",
+    "route": Routes.FACULTY_MANAGEMENT
+  },
+  {
+    "icon": Icons.admin_panel_settings,
+    "title": "Administrateurs",
+    "route": Routes.ADMIN_MANAGEMENT
+  },
+  {
+    "icon": Icons.people,
+    "title": "Utilisateurs",
+    "route": Routes.USER_MANAGEMENT
+  },
+  {
+    "icon": Icons.assignment,
+    "title": "Demandes",
+    "route": Routes.REQUEST_MANAGEMENT
+  },
+  {
+    "icon": Icons.security,
+    "title": "Permissions",
+    "route": Routes.PERMISSION_MANAGEMENT
+  },
   {"icon": Icons.message, "title": "Messagerie", "route": Routes.CHAT},
-  {"icon": Icons.notifications, "title": "Notifications", "route": Routes.NOTIFICATION},
+  {
+    "icon": Icons.notifications,
+    "title": "Notifications",
+    "route": Routes.NOTIFICATION
+  },
 ];
 
 final List<Map<String, dynamic>> dashboardItems = [
-  {"title": "Facultés", "icon": Icons.school, "color": Colors.green, "route": Routes.FACULTY_MANAGEMENT},
-  {"title": "Administrateurs", "icon": Icons.admin_panel_settings, "color": Colors.orange, "route": Routes.ADMIN_MANAGEMENT},
-  {"title": "Utilisateurs", "icon": Icons.people, "color": Colors.purple, "route": Routes.USER_MANAGEMENT},
-  {"title": "Demandes", "icon": Icons.assignment, "color": Colors.red, "route": Routes.REQUEST_MANAGEMENT},
-  {"title": "Permissions", "icon": Icons.security, "color": Colors.cyan, "route": Routes.PERMISSION_MANAGEMENT},
-  {"title": "Messagerie", "icon": Icons.message, "color": Colors.blueGrey, "route": Routes.CHAT},
-  {"title": "Notifications", "icon": Icons.notifications, "color": Colors.indigo, "route": Routes.NOTIFICATION},
+  {
+    "title": "Facultés",
+    "icon": Icons.school,
+    "color": Colors.green,
+    "route": Routes.FACULTY_MANAGEMENT
+  },
+  {
+    "title": "Administrateurs",
+    "icon": Icons.admin_panel_settings,
+    "color": Colors.orange,
+    "route": Routes.ADMIN_MANAGEMENT
+  },
+  {
+    "title": "Utilisateurs",
+    "icon": Icons.people,
+    "color": Colors.purple,
+    "route": Routes.USER_MANAGEMENT
+  },
+  {
+    "title": "Demandes",
+    "icon": Icons.assignment,
+    "color": Colors.red,
+    "route": Routes.REQUEST_MANAGEMENT
+  },
+  {
+    "title": "Permissions",
+    "icon": Icons.security,
+    "color": Colors.cyan,
+    "route": Routes.PERMISSION_MANAGEMENT
+  },
+  {
+    "title": "Messagerie",
+    "icon": Icons.message,
+    "color": Colors.blueGrey,
+    "route": Routes.CHAT
+  },
+  {
+    "title": "Notifications",
+    "icon": Icons.notifications,
+    "color": Colors.indigo,
+    "route": Routes.NOTIFICATION
+  },
 ];

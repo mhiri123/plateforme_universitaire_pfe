@@ -16,15 +16,21 @@ import '../../../services/notification_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AdminHomeScreen extends StatelessWidget {
-  final AdminHomeController adminHomeController = Get.put(AdminHomeController());
-  final DemandeReorientationController demandeReorientationController = Get.put(DemandeReorientationController());
-  final DemandeTransfertEnseignantController demandeTransfertEnseignantController = Get.put(DemandeTransfertEnseignantController());
-  final DemandeTransfertEtudiantController demandeTransfertEtudiantController = Get.put(DemandeTransfertEtudiantController());
+  final AdminHomeController adminHomeController =
+      Get.put(AdminHomeController());
+  final DemandeReorientationController demandeReorientationController =
+      Get.put(DemandeReorientationController());
+  final DemandeTransfertEnseignantController
+      demandeTransfertEnseignantController =
+      Get.put(DemandeTransfertEnseignantController());
+  final DemandeTransfertEtudiantController demandeTransfertEtudiantController =
+      Get.put(DemandeTransfertEtudiantController());
   final ChatController chatController = Get.put(ChatController());
   final NotificationService notificationService = Get.put(NotificationService(
     secureStorage: Get.find<FlutterSecureStorage>(),
   ));
-  final NotificationController notificationController = Get.put(NotificationController(Get.find<NotificationService>()));
+  final NotificationController notificationController =
+      Get.put(NotificationController(Get.find<NotificationService>()));
 
   @override
   Widget build(BuildContext context) {
@@ -46,29 +52,38 @@ class AdminHomeScreen extends StatelessWidget {
             width: 220,
             decoration: BoxDecoration(
               color: const Color(0xFF2E3A59),
-              borderRadius: BorderRadius.only(topRight: Radius.circular(20), bottomRight: Radius.circular(20)),
+              borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(20),
+                  bottomRight: Radius.circular(20)),
             ),
             padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const CircleAvatar(radius: 30, backgroundImage: AssetImage('assets/images/admin.jpeg')),
+                const CircleAvatar(
+                    radius: 30,
+                    backgroundImage: AssetImage('assets/images/admin.jpeg')),
                 const SizedBox(height: 30),
-                sideNavItem("Tableau de bord", Icons.dashboard, Routes.HOMEADMIN),
+                sideNavItem(
+                    "Tableau de bord", Icons.dashboard, Routes.HOMEADMIN),
 
                 // Menu déroulant pour les demandes
                 ExpansionTile(
-                  title: Text("Traiter demandes", style: TextStyle(color: Colors.white70, fontSize: 16)),
-                  leading: Icon(Icons.assignment_turned_in, color: Colors.white70),
+                  title: Text("Traiter demandes",
+                      style: TextStyle(color: Colors.white70, fontSize: 16)),
+                  leading:
+                      Icon(Icons.assignment_turned_in, color: Colors.white70),
                   children: [
-                    _buildSubNavItem("Traiter demande réorientation", Routes.TRAITER_DEMANDE_REO),
-                   // _buildSubNavItem("Traiter demande transfert étudiant", Routes.TRAITER_DEMANDE_TRANSFERT_ETUDIANT),
-                   // _buildSubNavItem("Traiter demande transfert enseignant", Routes.TRAITER_DEMANDE_TRANSFERT_ENSEIGNANT),
+                    _buildSubNavItem("Traiter demande réorientation",
+                        Routes.TRAITER_DEMANDE_REO),
+                    // _buildSubNavItem("Traiter demande transfert étudiant", Routes.TRAITER_DEMANDE_TRANSFERT_ETUDIANT),
+                    // _buildSubNavItem("Traiter demande transfert enseignant", Routes.TRAITER_DEMANDE_TRANSFERT_ENSEIGNANT),
                   ],
                 ),
 
                 sideNavItem("Messages", Icons.chat_bubble_outline, Routes.CHAT),
-                sideNavItem("Notifications", Icons.notifications, Routes.NOTIFICATION),
+                sideNavItem(
+                    "Notifications", Icons.notifications, Routes.NOTIFICATION),
                 const Spacer(),
                 sideNavItem("Déconnexion", Icons.logout, Routes.LOGIN),
               ],
@@ -98,50 +113,79 @@ class AdminHomeScreen extends StatelessWidget {
                     children: [
                       const Text(
                         "Bienvenue, Administrateur 👩‍💻",
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
                       ),
                       Row(
                         children: [
                           // Bouton Chat
                           IconButton(
                             icon: Obx(() => Stack(
-                              children: [
-                                const Icon(Icons.chat_bubble_outline, size: 26),
-                                if (chatController.unreadCount.value > 0)
-                                  Positioned(
-                                    right: 0,
-                                    top: 0,
-                                    child: Container(
-                                      padding: EdgeInsets.all(4),
-                                      decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        shape: BoxShape.circle,
+                                  children: [
+                                    const Icon(Icons.chat_bubble_outline,
+                                        size: 26),
+                                    if (chatController.unreadCount.value > 0)
+                                      Positioned(
+                                        right: 0,
+                                        top: 0,
+                                        child: Container(
+                                          padding: EdgeInsets.all(4),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Text(
+                                            '${chatController.unreadCount.value}',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
                                       ),
-                                      child: Text(
-                                        '${chatController.unreadCount.value}',
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            )),
+                                  ],
+                                )),
                             tooltip: 'Chat',
                             onPressed: () {
                               chatController.resetUnread();
                               Get.to(() => ChatScreen());
                             },
                           ),
-                          // Bouton Notifications
-                          IconButton(
-                            icon: const Icon(Icons.notifications_none, size: 28),
-                            tooltip: 'Notifications',
-                            onPressed: () => Get.toNamed(Routes.NOTIFICATION),
-                          ),
+                          // Bouton Notifications avec badge
+                          Obx(() => Stack(
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.notifications_none,
+                                        size: 28),
+                                    tooltip: 'Notifications',
+                                    onPressed: () =>
+                                        Get.toNamed(Routes.NOTIFICATION),
+                                  ),
+                                  if (notificationController.unreadCount > 0)
+                                    Positioned(
+                                      right: 6,
+                                      top: 6,
+                                      child: Container(
+                                        padding: EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.red,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Text(
+                                          '${notificationController.unreadCount}',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              )),
                           const SizedBox(width: 10),
-                          const CircleAvatar(backgroundImage: AssetImage('assets/images/admin.jpeg')),
+                          const CircleAvatar(
+                              backgroundImage:
+                                  AssetImage('assets/images/admin.jpeg')),
                         ],
                       ),
                     ],
@@ -151,11 +195,13 @@ class AdminHomeScreen extends StatelessWidget {
                 // Contenu scrollable
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 30),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 40, vertical: 30),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text("Votre tableau de bord administrateur", style: TextStyle(fontSize: 16)),
+                        const Text("Votre tableau de bord administrateur",
+                            style: TextStyle(fontSize: 16)),
                         const SizedBox(height: 30),
                         Row(
                           children: [
@@ -164,8 +210,7 @@ class AdminHomeScreen extends StatelessWidget {
                               child: Obx(() => statCard(
                                   "Demandes de Réorientation",
                                   '${adminHomeController.demandesReorientation.length}',
-                                  const Color(0xFF1E88E5)
-                              )),
+                                  const Color(0xFF1E88E5))),
                             ),
                             const SizedBox(width: 20),
                             // Carte Demandes de Transfert Enseignant
@@ -173,8 +218,7 @@ class AdminHomeScreen extends StatelessWidget {
                               child: Obx(() => statCard(
                                   "Transfert Enseignant",
                                   '${adminHomeController.demandesTransfertEnseignant.length}',
-                                  const Color(0xFF43A047)
-                              )),
+                                  const Color(0xFF43A047))),
                             ),
                           ],
                         ),
@@ -186,17 +230,16 @@ class AdminHomeScreen extends StatelessWidget {
                               child: Obx(() => statCard(
                                   "Transfert Étudiant",
                                   '${adminHomeController.demandesTransfertEtudiant.length}',
-                                  const Color(0xFFF4A460)
-                              )),
+                                  const Color(0xFFF4A460))),
                             ),
                             const SizedBox(width: 20),
                             // Carte Messages non lus
                             Expanded(
                               child: Obx(() => statCard(
-                                "Messages non lus",
-                                '${chatController.unreadCount.value}',
-                                const Color(0xFF8E24AA),
-                              )),
+                                    "Messages non lus",
+                                    '${chatController.unreadCount.value}',
+                                    const Color(0xFF8E24AA),
+                                  )),
                             ),
                           ],
                         ),
@@ -208,8 +251,7 @@ class AdminHomeScreen extends StatelessWidget {
                               child: Obx(() => statCard(
                                   "Notifications",
                                   '${notificationController.notifications.length}',
-                                  const Color(0xFFF9A825)
-                              )),
+                                  const Color(0xFFF9A825))),
                             ),
                             const SizedBox(width: 20),
                             // Carte vide ou supplémentaire si nécessaire
@@ -243,36 +285,41 @@ class AdminHomeScreen extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          border: Border(left: BorderSide(width: 3, color: Colors.white.withOpacity(0.3))),
+          border: Border(
+              left: BorderSide(width: 3, color: Colors.white.withOpacity(0.3))),
         ),
         child: Row(
           children: [
             if (title == "Messages")
               Obx(() => Stack(
-                children: [
-                  Icon(icon, color: Colors.white70),
-                  if (chatController.unreadCount.value > 0)
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: Container(
-                        padding: EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
+                    children: [
+                      Icon(icon, color: Colors.white70),
+                      if (chatController.unreadCount.value > 0)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Container(
+                            padding: EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text(
+                              '${chatController.unreadCount.value}',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
                         ),
-                        child: Text(
-                          '${chatController.unreadCount.value}',
-                          style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                ],
-              ))
+                    ],
+                  ))
             else
               Icon(icon, color: Colors.white70),
             const SizedBox(width: 10),
-            Text(title, style: const TextStyle(color: Colors.white70, fontSize: 16)),
+            Text(title,
+                style: const TextStyle(color: Colors.white70, fontSize: 16)),
           ],
         ),
       ),
@@ -316,9 +363,13 @@ class AdminHomeScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(title, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 16)),
+          Text(title,
+              style: TextStyle(
+                  color: color, fontWeight: FontWeight.bold, fontSize: 16)),
           const SizedBox(height: 10),
-          Text(value, style: TextStyle(color: color, fontSize: 28, fontWeight: FontWeight.bold)),
+          Text(value,
+              style: TextStyle(
+                  color: color, fontSize: 28, fontWeight: FontWeight.bold)),
         ],
       ),
     );

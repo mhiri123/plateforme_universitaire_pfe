@@ -4,15 +4,24 @@ import 'package:get_storage/get_storage.dart';
 import 'app/core/di/service_locator.dart';
 import 'app/routes/app_pages.dart';
 import 'app/services/dependency_service.dart';
+import 'app/modules/notification/controllers/notification_controller.dart';
+import 'app/services/notification_service.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
   DependencyService.init();
-  
+
   // Initialiser les services
   ServiceLocator.init();
-  
+
+  // Injection globale du NotificationController
+  final notificationService =
+      NotificationService(secureStorage: const FlutterSecureStorage());
+  Get.put(notificationService, permanent: true);
+  Get.put(NotificationController(notificationService), permanent: true);
+
   runApp(
     GetMaterialApp(
       debugShowCheckedModeBanner: false,

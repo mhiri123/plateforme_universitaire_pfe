@@ -26,14 +26,20 @@ class HomestudentView extends GetView<HomestudentController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const CircleAvatar(radius: 30, backgroundImage: AssetImage('assets/images/avatar.jpeg')),
+                const CircleAvatar(
+                    radius: 30,
+                    backgroundImage: AssetImage('assets/images/avatar.jpeg')),
                 const SizedBox(height: 30),
                 sideNavItem("Accueil", Icons.dashboard, Routes.HOMESTUDENT),
-                sideNavItem("Mes Demandes", Icons.assignment, Routes.MESDEMANDES),
+                sideNavItem(
+                    "Mes Demandes", Icons.assignment, Routes.MESDEMANDES),
                 sideNavItem("Chat", Icons.chat_bubble_outline, Routes.CHAT),
-                sideNavItem("Transfert", Icons.swap_horiz, Routes.DEMANDETRANSFERT),
-                sideNavItem("Réorientation", Icons.compare_arrows, Routes.DEMANDEREO),
-                sideNavItem("Notifications", Icons.notifications, Routes.NOTIFICATION),
+                sideNavItem(
+                    "Transfert", Icons.swap_horiz, Routes.DEMANDETRANSFERT),
+                sideNavItem(
+                    "Réorientation", Icons.compare_arrows, Routes.DEMANDEREO),
+                sideNavItem(
+                    "Notifications", Icons.notifications, Routes.NOTIFICATION),
                 const Spacer(),
                 sideNavItem("Déconnexion", Icons.logout, Routes.LOGIN),
               ],
@@ -50,60 +56,97 @@ class HomestudentView extends GetView<HomestudentController> {
                   padding: const EdgeInsets.symmetric(horizontal: 40),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    boxShadow: [BoxShadow(color: Colors.grey.shade300, blurRadius: 4, offset: Offset(0, 2))],
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.grey.shade300,
+                          blurRadius: 4,
+                          offset: Offset(0, 2))
+                    ],
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
                         "Salut, Étudiant 👋",
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
                       ),
                       Row(
                         children: [
                           IconButton(
                             icon: Obx(() => Stack(
-                              children: [
-                                const Icon(Icons.chat_bubble_outline, size: 26),
-                                if (chatController.unreadCount.value > 0)
-                                  Positioned(
-                                    right: 0,
-                                    top: 0,
-                                    child: Container(
-                                      padding: EdgeInsets.all(4),
-                                      decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        shape: BoxShape.circle,
+                                  children: [
+                                    const Icon(Icons.chat_bubble_outline,
+                                        size: 26),
+                                    if (chatController.unreadCount.value > 0)
+                                      Positioned(
+                                        right: 0,
+                                        top: 0,
+                                        child: Container(
+                                          padding: EdgeInsets.all(4),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Text(
+                                            '${chatController.unreadCount.value}',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
                                       ),
-                                      child: Text(
-                                        '${chatController.unreadCount.value}',
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            )),
+                                  ],
+                                )),
                             tooltip: 'Chat',
                             onPressed: () {
-                              chatController.receiverId = "2"; // ID de l'enseignant référent
+                              chatController.receiverId =
+                                  "2"; // ID de l'enseignant référent
                               chatController.receiverName = "Sami Enseignant";
                               chatController.receiverRole = "Enseignant";
-                              chatController.resetUnread(); // Remettre le badge à zéro
+                              chatController
+                                  .resetUnread(); // Remettre le badge à zéro
                               Get.to(() => ChatScreen());
                             },
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.notifications_none, size: 28),
-                            tooltip: 'Notifications',
-                            onPressed: () {
-                              Get.toNamed(Routes.NOTIFICATION);
-                            },
-                          ),
+                          // Bouton Notifications avec badge
+                          Obx(() => Stack(
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.notifications_none,
+                                        size: 28),
+                                    tooltip: 'Notifications',
+                                    onPressed: () =>
+                                        Get.toNamed(Routes.NOTIFICATION),
+                                  ),
+                                  if (Get.find<NotificationController>()
+                                          .unreadCount >
+                                      0)
+                                    Positioned(
+                                      right: 6,
+                                      top: 6,
+                                      child: Container(
+                                        padding: EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.red,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Text(
+                                          '${Get.find<NotificationController>().unreadCount}',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              )),
                           const SizedBox(width: 10),
-                          const CircleAvatar(backgroundImage: AssetImage('assets/images/avatar.jpeg')),
+                          const CircleAvatar(
+                              backgroundImage:
+                                  AssetImage('assets/images/avatar.jpeg')),
                         ],
                       ),
                     ],
@@ -113,7 +156,8 @@ class HomestudentView extends GetView<HomestudentController> {
                 // Contenu scrollable
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 30),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 40, vertical: 30),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -130,7 +174,8 @@ class HomestudentView extends GetView<HomestudentController> {
                               child: HoverCard(
                                 title: "Transferts",
                                 color: Colors.pinkAccent,
-                                onTap: () => Get.toNamed(Routes.DEMANDETRANSFERT),
+                                onTap: () =>
+                                    Get.toNamed(Routes.DEMANDETRANSFERT),
                               ),
                             ),
                             const SizedBox(width: 20),
@@ -154,7 +199,9 @@ class HomestudentView extends GetView<HomestudentController> {
                               ),
                             ),
                             const SizedBox(width: 20),
-                            Expanded(child: Container()), // Espace vide pour maintenir la mise en page
+                            Expanded(
+                                child:
+                                    Container()), // Espace vide pour maintenir la mise en page
                           ],
                         ),
                       ],
@@ -190,30 +237,34 @@ class HomestudentView extends GetView<HomestudentController> {
           children: [
             if (title == "Chat")
               Obx(() => Stack(
-                children: [
-                  Icon(icon, color: Colors.white70),
-                  if (chatController.unreadCount.value > 0)
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: Container(
-                        padding: EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
+                    children: [
+                      Icon(icon, color: Colors.white70),
+                      if (chatController.unreadCount.value > 0)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Container(
+                            padding: EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text(
+                              '${chatController.unreadCount.value}',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
                         ),
-                        child: Text(
-                          '${chatController.unreadCount.value}',
-                          style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                ],
-              ))
+                    ],
+                  ))
             else
               Icon(icon, color: Colors.white70),
             const SizedBox(width: 10),
-            Text(title, style: const TextStyle(color: Colors.white70, fontSize: 16)),
+            Text(title,
+                style: const TextStyle(color: Colors.white70, fontSize: 16)),
           ],
         ),
       ),
@@ -228,8 +279,8 @@ class HoverCard extends StatefulWidget {
   final VoidCallback onTap;
 
   const HoverCard({
-    Key? key, 
-    required this.title, 
+    Key? key,
+    required this.title,
     required this.color,
     required this.onTap,
   }) : super(key: key);
@@ -248,7 +299,8 @@ class _HoverCardState extends State<HoverCard> {
       onExit: (_) => _onHover(false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        transform: isHovered ? (Matrix4.identity()..scale(1.03)) : Matrix4.identity(),
+        transform:
+            isHovered ? (Matrix4.identity()..scale(1.03)) : Matrix4.identity(),
         height: 200,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -278,15 +330,23 @@ class _HoverCardState extends State<HoverCard> {
               child: ElevatedButton(
                 onPressed: widget.onTap,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isHovered ? widget.color.withOpacity(0.9) : widget.color,
+                  backgroundColor:
+                      isHovered ? widget.color.withOpacity(0.9) : widget.color,
                   elevation: 5,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                   shadowColor: widget.color.withOpacity(0.4),
                 ),
                 child: Text(
-                  widget.title == "Mes Demandes" ? "Voir mes demandes" : "Soumettre une demande",
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                  widget.title == "Mes Demandes"
+                      ? "Voir mes demandes"
+                      : "Soumettre une demande",
+                  style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
                 ),
               ),
             ),

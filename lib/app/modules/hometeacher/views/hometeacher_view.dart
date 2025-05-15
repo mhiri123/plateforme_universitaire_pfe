@@ -20,7 +20,8 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
   final NotificationService notificationService = Get.put(NotificationService(
     secureStorage: Get.find<FlutterSecureStorage>(),
   ));
-  final NotificationController notificationController = Get.put(NotificationController(Get.find<NotificationService>()));
+  final NotificationController notificationController =
+      Get.put(NotificationController(Get.find<NotificationService>()));
 
   final List<bool> _isHovered = [false, false];
 
@@ -38,12 +39,17 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const CircleAvatar(radius: 30, backgroundImage: AssetImage('assets/images/enseignant.jpg')),
+                const CircleAvatar(
+                    radius: 30,
+                    backgroundImage:
+                        AssetImage('assets/images/enseignant.jpg')),
                 const SizedBox(height: 30),
                 sideNavItem("Accueil", Icons.dashboard, Routes.HOMETEACHER),
                 sideNavItem("Chat", Icons.chat_bubble_outline, Routes.CHAT),
-                sideNavItem("Transfert", Icons.swap_horiz, Routes.DEMANDETRANSFETENSEIGNANT),
-                sideNavItem("Notifications", Icons.notifications, Routes.NOTIFICATION),
+                sideNavItem("Transfert", Icons.swap_horiz,
+                    Routes.DEMANDETRANSFETENSEIGNANT),
+                sideNavItem(
+                    "Notifications", Icons.notifications, Routes.NOTIFICATION),
                 const Spacer(),
                 sideNavItem("Déconnexion", Icons.logout, Routes.LOGIN),
               ],
@@ -60,58 +66,94 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 40),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    boxShadow: [BoxShadow(color: Colors.grey.shade300, blurRadius: 4, offset: const Offset(0, 2))],
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.grey.shade300,
+                          blurRadius: 4,
+                          offset: const Offset(0, 2))
+                    ],
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
                         "Bienvenue, Enseignant 👨‍🏫",
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
                       ),
                       Row(
                         children: [
                           IconButton(
                             icon: Obx(() => Stack(
-                              children: [
-                                const Icon(Icons.chat_bubble_outline, size: 26),
-                                if (chatController.unreadCount.value > 0)
-                                  Positioned(
-                                    right: 0,
-                                    top: 0,
-                                    child: Container(
-                                      padding: EdgeInsets.all(4),
-                                      decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        shape: BoxShape.circle,
+                                  children: [
+                                    const Icon(Icons.chat_bubble_outline,
+                                        size: 26),
+                                    if (chatController.unreadCount.value > 0)
+                                      Positioned(
+                                        right: 0,
+                                        top: 0,
+                                        child: Container(
+                                          padding: EdgeInsets.all(4),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Text(
+                                            '${chatController.unreadCount.value}',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
                                       ),
-                                      child: Text(
-                                        '${chatController.unreadCount.value}',
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            )),
+                                  ],
+                                )),
                             tooltip: 'Chat',
                             onPressed: () {
-                              chatController.receiverId = "1"; // ID de l'étudiant
+                              chatController.receiverId =
+                                  "1"; // ID de l'étudiant
                               chatController.receiverName = "Ali";
                               chatController.receiverRole = "Étudiant";
                               chatController.resetUnread();
                               Get.to(() => ChatScreen());
                             },
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.notifications_none, size: 28),
-                            tooltip: 'Notifications',
-                            onPressed: () => Get.toNamed(Routes.NOTIFICATION),
-                          ),
+                          // Bouton Notifications avec badge
+                          Obx(() => Stack(
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.notifications_none,
+                                        size: 28),
+                                    tooltip: 'Notifications',
+                                    onPressed: () =>
+                                        Get.toNamed(Routes.NOTIFICATION),
+                                  ),
+                                  if (notificationController.unreadCount > 0)
+                                    Positioned(
+                                      right: 6,
+                                      top: 6,
+                                      child: Container(
+                                        padding: EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.red,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Text(
+                                          '${notificationController.unreadCount}',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              )),
                           const SizedBox(width: 10),
-                          const CircleAvatar(backgroundImage: AssetImage('assets/images/enseignant.jpg')),
+                          const CircleAvatar(
+                              backgroundImage:
+                                  AssetImage('assets/images/enseignant.jpg')),
                         ],
                       ),
                     ],
@@ -121,7 +163,8 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                 // Contenu principal
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 30),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 40, vertical: 30),
                     child: Center(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -172,30 +215,34 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
           children: [
             if (title == "Chat")
               Obx(() => Stack(
-                children: [
-                  Icon(icon, color: Colors.white70),
-                  if (chatController.unreadCount.value > 0)
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: Container(
-                        padding: EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
+                    children: [
+                      Icon(icon, color: Colors.white70),
+                      if (chatController.unreadCount.value > 0)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Container(
+                            padding: EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text(
+                              '${chatController.unreadCount.value}',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
                         ),
-                        child: Text(
-                          '${chatController.unreadCount.value}',
-                          style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                ],
-              ))
+                    ],
+                  ))
             else
               Icon(icon, color: Colors.white70),
             const SizedBox(width: 10),
-            Text(title, style: const TextStyle(color: Colors.white70, fontSize: 16)),
+            Text(title,
+                style: const TextStyle(color: Colors.white70, fontSize: 16)),
           ],
         ),
       ),
@@ -203,13 +250,20 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
   }
 
   // Carte dynamique pour "Messages non lus" => ouvre le chat avec l'étudiant
-  Widget buildHoverCard({required int index, required String title, required Color color, int messageCount = 0, String buttonText = "Voir les messages"}) {
+  Widget buildHoverCard(
+      {required int index,
+      required String title,
+      required Color color,
+      int messageCount = 0,
+      String buttonText = "Voir les messages"}) {
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered[index] = true),
       onExit: (_) => setState(() => _isHovered[index] = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        transform: _isHovered[index] ? (Matrix4.identity()..scale(1.03)) : Matrix4.identity(),
+        transform: _isHovered[index]
+            ? (Matrix4.identity()..scale(1.03))
+            : Matrix4.identity(),
         curve: Curves.easeOut,
         height: 200,
         width: 250,
@@ -219,7 +273,9 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: _isHovered[index] ? color.withOpacity(0.4) : color.withOpacity(0.2),
+              color: _isHovered[index]
+                  ? color.withOpacity(0.4)
+                  : color.withOpacity(0.2),
               blurRadius: 10,
               offset: const Offset(0, 6),
             ),
@@ -232,7 +288,10 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(title, textAlign: TextAlign.center, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 18)),
+            Text(title,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: color, fontWeight: FontWeight.bold, fontSize: 18)),
             const SizedBox(height: 10),
             if (messageCount > 0)
               Container(
@@ -240,10 +299,14 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                   color: Colors.red,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 child: Text(
                   "$messageCount Non lus",
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12),
                 ),
               ),
             const SizedBox(height: 10),
@@ -261,11 +324,15 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: color,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
               ),
               child: Text(
                 buttonText,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
               ),
             ),
           ],
