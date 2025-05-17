@@ -59,7 +59,7 @@ class DemandeReorientation {
   final DateTime? dateTraitement;
 
   @JsonKey(
-    name: 'status',
+    name: 'statut',  // Utiliser 'statut' (français) au lieu de 'status' (anglais)
     fromJson: _statutFromJson,
     toJson: _statutToJson,
     defaultValue: StatutDemande.enAttente,

@@ -1,13 +1,8 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:retrofit/retrofit.dart';
 import '../models/notification_model.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:get/get.dart' hide Response;
-
-part 'notification_service.g.dart';
 
 class ApiConfig {
   static const String baseUrl = String.fromEnvironment(
@@ -16,32 +11,7 @@ class ApiConfig {
   );
 }
 
-@RestApi(baseUrl: ApiConfig.baseUrl)
-abstract class NotificationApiService {
-  factory NotificationApiService(Dio dio, {String? baseUrl}) =
-      _NotificationApiService;
-
-  @GET("/notifications")
-  Future<dynamic> listerNotifications();
-
-  @GET("/notifications/unread")
-  Future<dynamic> listerNotificationsNonLues();
-
-  @PUT("/notifications/{id}/read")
-  Future<dynamic> marquerCommeLue(@Path("id") int id);
-
-  @PUT("/notifications/read-all")
-  Future<dynamic> marquerToutCommeLues();
-
-  @DELETE("/notifications/{id}")
-  Future<dynamic> supprimerNotification(@Path("id") int id);
-
-  @POST("/notifications")
-  Future<dynamic> creerNotification(@Body() Map<String, dynamic> notification);
-}
-
 class NotificationService {
-  final NotificationApiService _apiService;
   final Dio _dio;
   final FlutterSecureStorage _secureStorage;
 
@@ -55,10 +25,8 @@ class NotificationService {
 
   NotificationService({
     Dio? dio,
-    NotificationApiService? apiService,
     FlutterSecureStorage? secureStorage,
   })  : _dio = dio ?? Dio(_defaultOptions),
-        _apiService = apiService ?? NotificationApiService(dio ?? Dio(_defaultOptions)),
         _secureStorage = secureStorage ?? const FlutterSecureStorage() {
     _configureDio();
   }
@@ -113,14 +81,15 @@ class NotificationService {
   Future<List<Notification>> listerNotifications() async {
     try {
       print('Tentative de récupération des notifications...');
-      final response = await _apiService.listerNotifications();
-      print('Réponse reçue du serveur: $response');
-
-      if (response['status'] == 'success' && response['data'] != null) {
-        final List<dynamic> notificationsData = response['data'];
-        return notificationsData.map((data) => Notification.fromJson(data)).toList();
+      final response = await _dio.get('/notifications');
+      final data = response.data as Map<String, dynamic>;
+      print('Réponse reçue du serveur: ${data['data']}');
+      
+      if (data['status'] == 'success' && data['data'] != null) {
+        final List<dynamic> notificationsData = data['data'];
+        return notificationsData.map((item) => Notification.fromJson(item)).toList();
       }
-
+      
       return [];
     } on DioException catch (e) {
       print('❌ Erreur Dio lors de la récupération des notifications:');
@@ -143,14 +112,15 @@ class NotificationService {
   Future<List<Notification>> listerNotificationsNonLues() async {
     try {
       print('Tentative de récupération des notifications non lues...');
-      final response = await _apiService.listerNotificationsNonLues();
-      print('Réponse reçue du serveur: $response');
-
-      if (response['status'] == 'success' && response['data'] != null) {
-        final List<dynamic> notificationsData = response['data'];
-        return notificationsData.map((data) => Notification.fromJson(data)).toList();
+      final response = await _dio.get('/notifications/unread');
+      final data = response.data as Map<String, dynamic>;
+      print('Réponse reçue du serveur: ${data['data']}');
+      
+      if (data['status'] == 'success' && data['data'] != null) {
+        final List<dynamic> notificationsData = data['data'];
+        return notificationsData.map((item) => Notification.fromJson(item)).toList();
       }
-
+      
       return [];
     } on DioException catch (e) {
       print('❌ Erreur Dio lors de la récupération des notifications non lues:');
@@ -173,13 +143,14 @@ class NotificationService {
   Future<Notification> marquerCommeLue(int id) async {
     try {
       print('Tentative de marquage de la notification $id comme lue...');
-      final response = await _apiService.marquerCommeLue(id);
-      print('Réponse reçue du serveur: $response');
-
-      if (response['status'] == 'success' && response['data'] != null) {
-        return Notification.fromJson(response['data']);
+      final response = await _dio.put('/notifications/$id/read');
+      final data = response.data as Map<String, dynamic>;
+      print('Réponse reçue du serveur: ${data['data']}');
+      
+      if (data['status'] == 'success' && data['data'] != null) {
+        return Notification.fromJson(data['data']);
       }
-
+      
       throw Exception('Réponse invalide du serveur');
     } on DioException catch (e) {
       print('❌ Erreur Dio lors du marquage de la notification:');
@@ -202,11 +173,12 @@ class NotificationService {
   Future<void> marquerToutCommeLues() async {
     try {
       print('Tentative de marquer toutes les notifications comme lues');
-      final response = await _apiService.marquerToutCommeLues();
-      print('Réponse reçue du serveur: $response');
-
-      if (response['status'] != 'success') {
-        throw Exception(response['message'] ?? 'Erreur lors du marquage des notifications');
+      final response = await _dio.put('/notifications/read-all');
+      final data = response.data as Map<String, dynamic>;
+      print('Réponse reçue du serveur: ${data['message']}');
+      
+      if (data['status'] != 'success') {
+        throw Exception(data['message'] ?? 'Erreur lors du marquage des notifications');
       }
     } on DioException catch (e) {
       print('❌ Erreur Dio lors du marquage de toutes les notifications:');
@@ -229,11 +201,12 @@ class NotificationService {
   Future<void> supprimerNotification(int id) async {
     try {
       print('Tentative de suppression de la notification $id...');
-      final response = await _apiService.supprimerNotification(id);
-      print('Réponse reçue du serveur: $response');
-
-      if (response['status'] != 'success') {
-        throw Exception(response['message'] ?? 'Erreur lors de la suppression de la notification');
+      final response = await _dio.delete('/notifications/$id');
+      final data = response.data as Map<String, dynamic>;
+      print('Réponse reçue du serveur: ${data['message']}');
+      
+      if (data['status'] != 'success') {
+        throw Exception(data['message'] ?? 'Erreur lors de la suppression de la notification');
       }
     } on DioException catch (e) {
       print('❌ Erreur Dio lors de la suppression de la notification:');
@@ -261,7 +234,7 @@ class NotificationService {
   }) async {
     try {
       print('Tentative de création d\'une notification...');
-      final response = await _apiService.creerNotification({
+      final response = await _dio.post('/notifications', data: {
         'type': type,
         'destinataire_id': destinataireId,
         'titre': titre,
@@ -269,12 +242,13 @@ class NotificationService {
         'is_read': false,
         'created_at': DateTime.now().toIso8601String(),
       });
-      print('Réponse reçue du serveur: $response');
-
-      if (response['status'] == 'success' && response['data'] != null) {
-        return Notification.fromJson(response['data']);
+      final data = response.data as Map<String, dynamic>;
+      print('Réponse reçue du serveur: ${data['data']}');
+      
+      if (data['status'] == 'success' && data['data'] != null) {
+        return Notification.fromJson(data['data']);
       }
-
+      
       throw Exception('Réponse invalide du serveur');
     } on DioException catch (e) {
       print('❌ Erreur Dio lors de la création de la notification:');
@@ -302,11 +276,11 @@ class NotificationService {
     print('Méthode: ${error.requestOptions.method}');
     print('Headers: ${error.requestOptions.headers}');
     print('Data: ${error.requestOptions.data}');
-
+    
     if (error.response != null) {
       print('Status code: ${error.response?.statusCode}');
       print('Réponse d\'erreur: ${error.response?.data}');
-
+      
       switch (error.response?.statusCode) {
         case 400:
           throw Exception('Données invalides. Veuillez vérifier les informations saisies.');
@@ -327,4 +301,3 @@ class NotificationService {
     }
   }
 }
-

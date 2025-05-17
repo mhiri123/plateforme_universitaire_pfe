@@ -114,22 +114,24 @@ class NotificationCard extends StatelessWidget {
               Row(
                 children: [
                   Icon(
-                    _getIconForType(notification.type),
-                    color: notification.isRead ? Colors.grey : Colors.blue,
+                    _getIconForType(notification.type ?? 'default'),
+                    color: (notification.isRead ?? false) ? Colors.grey : Colors.blue,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      notification.titre,
+                      notification.titre ?? 'Sans titre',
                       style: TextStyle(
-                        fontWeight: notification.isRead
-                            ? FontWeight.normal
-                            : FontWeight.bold,
+                        fontWeight: notification.isRead != null
+                            ? (notification.isRead!
+                                ? FontWeight.normal
+                                : FontWeight.bold)
+                            : FontWeight.normal,
                         fontSize: 16,
                       ),
                     ),
                   ),
-                  if (!notification.isRead)
+                  if (notification.isRead != null && !(notification.isRead!))
                     Container(
                       width: 8,
                       height: 8,
@@ -147,14 +149,14 @@ class NotificationCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                notification.message,
+                notification.message ?? 'Pas de contenu',
                 style: TextStyle(
-                  color: notification.isRead ? Colors.grey : Colors.black87,
+                  color: (notification.isRead ?? false) ? Colors.grey : Colors.black87,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                timeago.format(notification.createdAt, locale: 'fr'),
+                timeago.format(notification.createdAt ?? DateTime.now(), locale: 'fr'),
                 style: const TextStyle(
                   color: Colors.grey,
                   fontSize: 12,
@@ -168,6 +170,7 @@ class NotificationCard extends StatelessWidget {
   }
 
   IconData _getIconForType(String type) {
+    if (type.isEmpty) return Icons.notifications;
     switch (type.toLowerCase()) {
       case 'transfert':
         return Icons.swap_horiz;

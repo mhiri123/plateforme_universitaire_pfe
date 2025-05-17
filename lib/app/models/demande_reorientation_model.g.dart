@@ -19,9 +19,9 @@ DemandeReorientation _$DemandeReorientationFromJson(
           json['date_creation'] as String?),
       dateTraitement: DemandeReorientation._dateTimeFromJson(
           json['date_traitement'] as String?),
-      statut: json['status'] == null
+      statut: json['statut'] == null
           ? StatutDemande.enAttente
-          : DemandeReorientation._statutFromJson(json['status'] as String?),
+          : DemandeReorientation._statutFromJson(json['statut'] as String?),
       commentaireAdmin: json['commentaire_admin'] as String?,
       pieceJustificative: json['piece_justificative'] as String?,
       level: json['level'] as String? ?? '',
@@ -41,7 +41,7 @@ Map<String, dynamic> _$DemandeReorientationToJson(
           DemandeReorientation._dateTimeToJson(instance.dateCreation),
       'date_traitement':
           DemandeReorientation._dateTimeToJson(instance.dateTraitement),
-      'status': DemandeReorientation._statutToJson(instance.statut),
+      'statut': DemandeReorientation._statutToJson(instance.statut),
       if (instance.commentaireAdmin case final value?)
         'commentaire_admin': value,
       if (instance.pieceJustificative case final value?)

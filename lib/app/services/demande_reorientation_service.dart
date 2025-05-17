@@ -26,11 +26,14 @@ abstract class DemandeReorientationApiService {
   @MultiPart()
   Future<DemandeReorientation> soumettreDemande(@Body() FormData formData);
 
+  @GET("/reorientation/demandes")
+  Future<dynamic> listerToutesDemandes();
+  
   @GET("/reorientation/demandes/en-attente")
-  Future<List<DemandeReorientation>> listerDemandesEnAttente();
+  Future<dynamic> listerDemandesEnAttente();
 
   @GET("/reorientation/demandes/etudiant/{id}")
-  Future<List<DemandeReorientation>> listerMesDemandesReorientation(@Path("id") int id);
+  Future<dynamic> listerMesDemandesReorientation(@Path("id") int id);
 
   @PUT("/reorientation/demandes/{id}/traiter")
   Future<DemandeReorientation> traiterDemande(
@@ -181,22 +184,42 @@ class DemandeReorientationService {
   Future<List<DemandeReorientation>> listerDemandesEnAttente() async {
     try {
       print('Tentative de récupération des demandes en attente...');
-      final response = await _apiService.listerDemandesEnAttente();
-      print('Réponse reçue du serveur: ${response.length} demandes');
       
-      // Log des détails de chaque demande
-      for (var demande in response) {
-        print('Demande trouvée:');
-        print('- ID: ${demande.id}');
-        print('- Nom: ${demande.nom}');
-        print('- Prénom: ${demande.prenom}');
-        print('- Filière actuelle: ${demande.filiereActuelleNom}');
-        print('- Nouvelle filière: ${demande.nouvelleFiliereNom}');
-        print('- Faculté: ${demande.facultyName}');
-        print('- Statut: ${demande.statut}');
+      // Récupérer le rôle de l'utilisateur connecté
+      final userRole = await _getUserRole();
+      print('Rôle utilisateur: $userRole');
+      
+      // Pour tous les utilisateurs, utiliser directement l'endpoint /demandes/en-attente
+      print('Utilisation de l\'endpoint /reorientation/demandes/en-attente');
+      
+      // Appeler directement l'API backend qui filtre déjà les demandes en attente
+      final response = await _apiService.listerDemandesEnAttente();
+      print('Réponse reçue du serveur: $response');
+      
+      if (response is Map<String, dynamic> && response['status'] == 'success' && response['data'] != null) {
+        final List<dynamic> demandesData = response['data'];
+        final List<DemandeReorientation> demandesEnAttente = demandesData
+            .map((data) => DemandeReorientation.fromJson(data))
+            .toList();
+        
+        print('${demandesEnAttente.length} demandes en attente reçues du serveur');
+        
+        // Log des détails de chaque demande en attente
+        for (var demande in demandesEnAttente) {
+          print('Demande en attente trouvée:');
+          print('- ID: ${demande.id}');
+          print('- Nom: ${demande.nom}');
+          print('- Prénom: ${demande.prenom}');
+          print('- Filière actuelle: ${demande.filiereActuelleNom}');
+          print('- Nouvelle filière: ${demande.nouvelleFiliereNom}');
+          print('- Faculté: ${demande.facultyName}');
+          print('- Statut: ${demande.statut}');
+        }
+        
+        return demandesEnAttente;
       }
       
-      return response;
+      return [];
     } on DioException catch (e) {
       print('❌ Erreur Dio lors de la récupération des demandes:');
       print('Type: ${e.type}');
@@ -219,8 +242,19 @@ class DemandeReorientationService {
     try {
       print('Tentative de récupération des demandes pour l\'étudiant $idEtudiant');
       final response = await _apiService.listerMesDemandesReorientation(idEtudiant);
-      print('${response.length} demandes récupérées');
-      return response;
+      print('Réponse reçue du serveur: $response');
+      
+      if (response is Map<String, dynamic> && response['status'] == 'success' && response['data'] != null) {
+        final List<dynamic> demandesData = response['data'];
+        final demandes = demandesData
+            .map((data) => DemandeReorientation.fromJson(data))
+            .toList();
+        
+        print('${demandes.length} demandes récupérées');
+        return demandes;
+      }
+      
+      return [];
     } on DioException catch (e) {
       print('❌ Erreur lors de la récupération des demandes:');
       print('Type: ${e.type}');
@@ -255,13 +289,13 @@ class DemandeReorientationService {
       // Préparer les données dans le format attendu par le serveur
       final status = isAccepted ? 'acceptee' : 'rejetee';
       final donneesTraitement = {
-        'status': status,
+        'statut': status,  // Utiliser 'statut' (français) au lieu de 'status' (anglais)
         'commentaire_admin': commentaire ?? '',
         'date_traitement': DateTime.now().toIso8601String(),
       };
 
       print('\nDonnées envoyées au serveur:');
-      print('- Status: $status');
+      print('- Statut: $status');
       print('- Commentaire: ${donneesTraitement['commentaire_admin']}');
       print('- Date: ${donneesTraitement['date_traitement']}');
       print('- URL: ${ApiConfig.baseUrl}/reorientation/demandes/${demande.id}/traiter');
@@ -489,18 +523,32 @@ Motif : $commentaire
   Future<int> _getIdEtudiantConnecte() async {
     try {
       final box = GetStorage();
-      final id = box.read('userId');
-      if (id == null) {
-        throw Exception('Identifiant utilisateur non trouvé dans le stockage');
+      final userData = box.read('user');
+      
+      if (userData != null && userData['id'] != null) {
+        return userData['id'];
       }
-      final userId = int.tryParse(id.toString());
-      if (userId == null || userId <= 0) {
-        throw Exception('ID utilisateur invalide');
-      }
-      return userId;
+      
+      return 0;
     } catch (e) {
       print('Erreur lors de la récupération de l\'ID utilisateur: $e');
-      rethrow;
+      return 0;
+    }
+  }
+  
+  Future<String> _getUserRole() async {
+    try {
+      final box = GetStorage();
+      final userData = box.read('user');
+      
+      if (userData != null && userData['role'] != null) {
+        return userData['role'];
+      }
+      
+      return 'etudiant'; // Rôle par défaut
+    } catch (e) {
+      print('Erreur lors de la récupération du rôle utilisateur: $e');
+      return 'etudiant';
     }
   }
 
